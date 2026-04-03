@@ -1,0 +1,104 @@
+<div class="auth-wrapper">
+  <div class="auth-container animate-slide-up">
+    
+    <div class="auth-form-section">
+      <div class="form-header">
+        <h3>Create an Account</h3>
+        <p>Enter your details to initialize your workspace.</p>
+      </div>
+
+      <div *ngIf="showMessage" class="alert alert-success">{{ responseMessage }}</div>
+      <div *ngIf="showError" class="alert alert-danger">{{ errorMessage }}</div>
+
+      <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label>Username</label>
+          <div class="input-wrapper">
+            <input type="text" formControlName="username" placeholder="Choose a unique username">
+          </div>
+          <div *ngIf="itemForm.get('username')?.touched && itemForm.get('username')?.invalid" class="validation-error">
+            <span *ngIf="itemForm.get('username')?.errors?.['required']">Username is required.</span>
+            <span *ngIf="itemForm.get('username')?.errors?.['pattern']">Must be 4-20 characters (no spaces).</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Email Address</label>
+          <div class="input-wrapper">
+            <input type="email" formControlName="email" placeholder="name@company.com">
+          </div>
+          <div *ngIf="itemForm.get('email')?.touched && itemForm.get('email')?.invalid" class="validation-error">
+            <span *ngIf="itemForm.get('email')?.errors?.['required']">Email is required.</span>
+            <span *ngIf="itemForm.get('email')?.errors?.['pattern']">Please enter a valid email address.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-wrapper">
+            <input type="password" formControlName="password" placeholder="Strong password">
+          </div>
+          <div *ngIf="itemForm.get('password')?.touched && itemForm.get('password')?.invalid" class="validation-error">
+            <span *ngIf="itemForm.get('password')?.errors?.['required']">Password is required.</span>
+            <span *ngIf="itemForm.get('password')?.errors?.['pattern']">Must be at least 8 characters, 1 uppercase, 1 lowercase, 1 number, and 1 symbol.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Select Role</label>
+          <div class="input-wrapper">
+            <select formControlName="role">
+              <option value="" disabled selected>-- Select an Access Level --</option>
+              <option value="CLIENT">Client</option>
+              <option value="STAFF">Staff Member</option>
+              <option value="PLANNER">Event Planner</option>
+            </select>
+          </div>
+          <div *ngIf="itemForm.get('role')?.touched && itemForm.get('role')?.invalid" class="validation-error">
+            Role selection is required.
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="itemForm.get('role')?.value === 'PLANNER' || itemForm.get('role')?.value === 'STAFF'">
+          <label>Authorization Passcode</label>
+          <div class="input-wrapper">
+            
+            <svg class="input-icon auth-shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <path d="M10 12v-2a2 2 0 1 1 4 0v2"></path>
+              <rect x="9" y="12" width="6" height="5" rx="1"></rect>
+            </svg>
+
+            <input type="password" formControlName="authCode" placeholder="Enter administrative passcode">
+          </div>
+          
+          <div *ngIf="itemForm.get('authCode')?.touched && itemForm.get('authCode')?.invalid" class="validation-error">
+            <span *ngIf="itemForm.get('authCode')?.errors?.['required']">A security passcode is required for this role.</span>
+            <span *ngIf="itemForm.get('authCode')?.errors?.['pattern']">Invalid passcode. Access Denied.</span>
+          </div>
+        </div>
+
+        <button type="submit" class="auth-btn" [disabled]="!itemForm.valid">Create Account</button>
+      </form>
+
+      <div class="auth-footer">
+        Already have an account? <a routerLink="/login">Log in here</a>
+      </div>
+    </div>
+
+    <div class="auth-banner">
+      <div class="banner-content">
+        <svg class="brand-svg" viewBox="0 0 100 100" fill="none" stroke="var(--c-teal)" stroke-width="4">
+          <circle cx="50" cy="50" r="40" stroke-dasharray="10 5" opacity="0.5"></circle>
+          <path d="M 30 50 L 50 30 L 70 50 L 50 70 Z" fill="var(--c-teal)" opacity="0.2"></path>
+          <circle cx="50" cy="50" r="10" fill="var(--c-orange)"></circle>
+          <line x1="50" y1="10" x2="50" y2="30" stroke="var(--c-orange)"></line>
+          <line x1="50" y1="70" x2="50" y2="90" stroke="var(--c-orange)"></line>
+        </svg>
+        <h2>EventMaster Pro</h2>
+        <p>Enterprise orchestration, automated scaling, and secure operational tracking.</p>
+      </div>
+    </div>
+
+  </div>
+</div>

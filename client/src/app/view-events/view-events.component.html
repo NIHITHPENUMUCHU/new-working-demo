@@ -1,0 +1,103 @@
+<div class="page-wrapper animate-slide-up">
+  <div class="page-header">
+    <div class="header-icon teal-bg">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path
+          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+        </path>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h2>Operations & Setup</h2>
+      <p>Search for an event sequence by ID to manage its operational status.</p>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <div class="enterprise-card form-card search-card">
+      <h3>Lookup Event</h3>
+
+      <div *ngIf="showMessage" class="alert alert-success">{{ responseMessage }}</div>
+      <div *ngIf="showError" class="alert alert-danger">{{ errorMessage }}</div>
+
+      <div class="form-group">
+        <label>Target Event ID</label>
+        <input type="number" (input)="formModel.eventID = $any($event.target).value" placeholder="e.g., 1">
+      </div>
+      <button class="btn-primary" (click)="searchEvent()">Search Registry</button>
+    </div>
+
+    <div class="enterprise-card table-card empty-state-card" *ngIf="!isUpdate">
+      <div class="empty-content">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+          stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <p>Awaiting event selection. Enter an ID on the left to begin operations.</p>
+      </div>
+    </div>
+
+    <div class="enterprise-card table-card form-card animate-slide-up" *ngIf="isUpdate">
+      <div class="edit-header">
+        <h3>Editing: <span style="color: var(--c-teal);">{{ eventObj?.title }}</span></h3>
+      </div>
+
+      <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label>Event Title</label>
+          <input type="text" formControlName="title">
+          <div *ngIf="itemForm.get('title')?.invalid && itemForm.get('title')?.touched" class="validation-error">Title
+            is required.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea formControlName="description" rows="3"></textarea>
+          <div *ngIf="itemForm.get('description')?.invalid && itemForm.get('description')?.touched"
+            class="validation-error">Description is required.</div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Date & Time</label>
+            <input type="datetime-local" formControlName="dateTime">
+            <div *ngIf="itemForm.get('dateTime')?.invalid && itemForm.get('dateTime')?.touched"
+              class="validation-error">Required.</div>
+          </div>
+
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" formControlName="location">
+            <div *ngIf="itemForm.get('location')?.invalid && itemForm.get('location')?.touched"
+              class="validation-error">Required.</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Operational Status</label>
+          <select formControlName="status">
+            <option value="SCHEDULED">Scheduled</option>
+            <option value="ONGOING">Ongoing</option>
+            <option value="COMPLETED">Completed</option>
+          </select>
+          <div *ngIf="itemForm.get('status')?.invalid && itemForm.get('status')?.touched" class="validation-error">
+            Status is required.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Update Seat Capacity</label>
+          <input type="number" formControlName="maxCapacity" placeholder="Modify total seats" min="1">
+          <small style="color: #64748b; font-size: 0.75rem;">Modifying this will alert the Planner.</small>
+        </div>
+
+        <div class="action-buttons">
+          <button type="submit" class="btn-primary navy-btn" [disabled]="!itemForm.valid">Save Updates</button>
+          <button type="button" class="btn-cancel" (click)="isUpdate = false">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

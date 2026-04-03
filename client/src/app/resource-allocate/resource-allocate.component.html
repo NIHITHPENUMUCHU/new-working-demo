@@ -1,0 +1,99 @@
+<div class="page-wrapper animate-slide-up">
+  <div class="page-header">
+    <div class="header-icon navy-bg">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h2>Resource Allocation</h2>
+      <p>Bind available inventory and quantities to scheduled events.</p>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <div class="enterprise-card form-card">
+      <h3>Assign Asset</h3>
+
+      <div *ngIf="showMessage" class="alert alert-success">{{ responseMessage }}</div>
+      <div *ngIf="showError" class="alert alert-danger">{{ errorMessage }}</div>
+
+      <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label>Target Event</label>
+          <select formControlName="eventId">
+            <option value="" disabled selected>-- Select an Event --</option>
+            <option *ngFor="let ev of eventList" [value]="ev.eventID || ev.id">
+              #{{ev.eventID || ev.id || '...'}} - {{ ev.title || ev.name }}
+            </option>
+          </select>
+          <span class="validation-error" *ngIf="itemForm.get('eventId')?.touched && itemForm.get('eventId')?.invalid">Required</span>
+        </div>
+
+        <div class="form-group">
+          <label>Available Resource</label>
+          <select formControlName="resourceId">
+            <option value="" disabled selected>-- Select a Resource --</option>
+            <option *ngFor="let res of resourceList" [value]="res.resourceID || res.id">
+              #{{res.resourceID || res.id || '...'}} - {{ res.name }}
+            </option>
+          </select>
+          <span class="validation-error" *ngIf="itemForm.get('resourceId')?.touched && itemForm.get('resourceId')?.invalid">Required</span>
+        </div>
+
+        <div class="form-group">
+          <label>Quantity Required</label>
+          <input type="number" formControlName="quantity" placeholder="Enter amount to allocate" min="1">
+          <span class="validation-error" *ngIf="itemForm.get('quantity')?.touched && itemForm.get('quantity')?.errors?.['required']">Please enter a valid quantity.</span>
+          <span class="validation-error" *ngIf="itemForm.get('quantity')?.touched && itemForm.get('quantity')?.errors?.['min']">Quantity must be at least 1.</span>
+          <span class="validation-error" *ngIf="itemForm.get('quantity')?.touched && itemForm.get('quantity')?.errors?.['max']">Exceeds available stock! Maximum allowed is {{ selectedResourceMax }}.</span>
+        </div>
+
+        <button type="submit" class="btn-primary navy-btn" [disabled]="!itemForm.valid">Bind Allocation</button>
+      </form>
+    </div>
+
+    <div class="enterprise-card table-card">
+      <h3>Active Allocations Registry</h3>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Alloc. ID</th>
+              <th>Resource Allocated</th>
+              <th>Target Event</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let alloc of paginatedAllocationList; let i = index">
+              <td class="id-col">#{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+              <td class="fw-bold" style="color: var(--c-teal);">{{ alloc.resource?.name || 'Unknown Asset' }}</td>
+              <td>{{ alloc.event?.title || alloc.event?.name || 'Unknown Event' }}</td>
+              <td class="fw-bold" style="color: var(--c-orange);">{{ alloc.quantity != null ? alloc.quantity : 1 }} Units</td>
+            </tr>
+            <tr *ngIf="allocationList.length === 0">
+              <td colspan="4" class="empty-state">No active allocations found in the registry.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination-container" *ngIf="totalPages > 1">
+        <button class="page-btn nav-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg> Prev
+        </button>
+        <div class="page-numbers">
+          <button *ngFor="let p of getPagesArray()" class="page-btn" [class.active]="p === currentPage" (click)="changePage(p)">
+            {{ p }}
+          </button>
+        </div>
+        <button class="page-btn nav-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
+          Next <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,187 @@
+<div class="custom-palette-dashboard animate-slide-up">
+
+  <header class="hero-banner">
+    <div class="hero-content">
+      <div class="role-badge">{{ roleName }}</div>
+      
+      <h1>Welcome to your Workspace, <span class="highlight-name">{{ username }}</span></h1>
+      
+      <div class="system-status-bar">
+        
+        <div class="status-item">
+          <div class="status-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+          <div class="status-text">
+            <small>Current System Date</small>
+            <strong>{{ currentDate | date:'fullDate' }}</strong>
+          </div>
+        </div>
+
+        <div class="status-divider"></div>
+
+        <div class="status-item">
+          <div class="status-icon orange-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <div class="status-text">
+            <small>Last LogIn</small>
+            <strong>{{ lastLogin | date:'MMM d, y, h:mm a' }}</strong>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    
+    <div class="hero-shapes">
+      <div class="shape teal-circle"></div>
+      <div class="shape orange-square"></div>
+    </div>
+  </header>
+
+  <ng-container *ngIf="roleName === 'PLANNER'">
+    
+    <h3 class="section-title">Operations Metrics</h3>
+    <div class="metrics-container">
+      
+      <div class="metric-card navy-accent">
+        <div class="custom-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        </div>
+        <div class="metric-text">
+          <h2>{{ totalEvents }}</h2>
+          <span>Total Drafted Events</span>
+        </div>
+      </div>
+
+      <div class="metric-card teal-accent">
+        <div class="custom-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <div class="metric-text">
+          <h2>{{ scheduledEvents }}</h2>
+          <span>Scheduled / Awaiting</span>
+        </div>
+      </div>
+
+      <div class="metric-card orange-accent">
+        <div class="custom-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
+        <div class="metric-text">
+          <h2>{{ ongoingEvents }}</h2>
+          <span>Live / Ongoing</span>
+        </div>
+      </div>
+
+      <div class="metric-card navy-accent">
+        <div class="custom-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <div class="metric-text">
+          <h2>{{ completedEvents }}</h2>
+          <span>Successfully Completed</span>
+        </div>
+      </div>
+
+    </div>
+
+    <h3 class="section-title">Inventory & Asset Tracking</h3>
+    <div class="metrics-container">
+      <div class="metric-card teal-accent">
+        <div class="custom-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+        </div>
+        <div class="metric-text">
+          <h2>{{ availableResources }}<small>/{{ totalResources }}</small></h2>
+          <span>Available Resources</span>
+        </div>
+      </div>
+
+      <div class="metric-card orange-accent">
+        <div class="custom-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        </div>
+        <div class="metric-text">
+          <h2>{{ totalAllocations }}</h2>
+          <span>Active Allocations</span>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="section-title">Quick Actions</h3>
+    <div class="actions-grid">
+      <div class="action-card" routerLink="/create-event">
+        <div class="card-indicator"></div>
+        <h4>Draft Event</h4>
+        <p>Schedule and configure a new event.</p>
+        <span class="arrow-btn">→</span>
+      </div>
+      <div class="action-card" routerLink="/add-resource">
+        <div class="card-indicator"></div>
+        <h4>Add Inventory</h4>
+        <p>Register new equipment or personnel.</p>
+        <span class="arrow-btn">→</span>
+      </div>
+      <div class="action-card" routerLink="/resource-allocate">
+        <div class="card-indicator"></div>
+        <h4>Allocate</h4>
+        <p>Assign available resources to events.</p>
+        <span class="arrow-btn">→</span>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="roleName === 'STAFF'">
+    <div class="focused-workspace">
+      <div class="action-card large-card" routerLink="/view-events">
+        <div class="custom-icon teal-fill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </div>
+        <h3>Event Operations & Setup</h3>
+        <p>Update live event statuses and operational parameters.</p>
+        <button class="palette-btn">Initialize Operations</button>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="roleName === 'CLIENT'">
+    <div class="focused-workspace client-layout">
+      
+      <div class="action-card large-card" routerLink="/booking-details">
+        <div class="custom-icon orange-fill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect>
+            <circle cx="3" cy="12" r="2" fill="var(--bg-base)"></circle>
+            <circle cx="21" cy="12" r="2" fill="var(--bg-base)"></circle>
+            <line x1="9" y1="8" x2="15" y2="8" stroke-dasharray="2 2"></line>
+            <line x1="9" y1="16" x2="15" y2="16" stroke-dasharray="2 2"></line>
+          </svg>
+        </div>
+        <h3>Retrieve Digital Ticket</h3>
+        <p>Enter your Booking ID to view your event's live status and details.</p>
+        <button class="palette-btn orange-btn">Access Ticket</button>
+      </div>
+
+      <div class="faq-container">
+        <h3>Client Guide & FAQs</h3>
+        <div class="accordion">
+          <div class="accordion-item" *ngFor="let faq of faqs; let i = index" [class.open]="activeFaqIndex === i">
+            <div class="accordion-header" (click)="toggleFaqItem(i)">
+              <h4>{{ faq.question }}</h4>
+              <span class="icon">{{ activeFaqIndex === i ? '−' : '+' }}</span>
+            </div>
+            <div class="accordion-content" [class.show]="activeFaqIndex === i">
+              <p>{{ faq.answer }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+
+</div>

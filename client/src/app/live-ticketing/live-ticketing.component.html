@@ -1,0 +1,60 @@
+<div class="page-wrapper animate-slide-up">
+  <div class="page-header">
+    <div class="header-icon indigo-bg">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h2>Live Ticketing Hub</h2>
+      <p>Monitor seat capacity, client bookings, and sold-out statuses in real-time.</p>
+    </div>
+  </div>
+
+  <div class="ticket-hub-grid">
+    <div class="empty-state" *ngIf="allEvents.length === 0">
+      No events found in the database.
+    </div>
+
+    <div class="hub-card animate-slide-up" *ngFor="let ev of allEvents">
+      <div class="hub-header" [ngClass]="ev.status?.toLowerCase()">
+        <h4>{{ ev.title }}</h4>
+        <span>{{ ev.status }}</span>
+      </div>
+      
+      <div class="hub-body">
+        <div class="capacity-stats">
+          <div class="stat">
+            <span>Booked Seats</span>
+            <strong>{{ ev.bookedCount || 0 }}</strong>
+          </div>
+          <div class="stat">
+            <span>Max Capacity</span>
+            <strong>{{ ev.maxCapacity || 0 }}</strong>
+          </div>
+        </div>
+        
+        <div class="progress-track">
+          <div class="progress-fill" 
+               [style.width.%]="getCapacityPercentage(ev.bookedCount, ev.maxCapacity)" 
+               [class.full]="getCapacityPercentage(ev.bookedCount, ev.maxCapacity) >= 100">
+          </div>
+        </div>
+
+        <div class="spots-indicator">
+          <p class="spots-left" *ngIf="getCapacityPercentage(ev.bookedCount, ev.maxCapacity) < 100">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            {{ (ev.maxCapacity || 0) - (ev.bookedCount || 0) }} Spots Remaining
+          </p>
+          
+          <p class="spots-left sold-out-text" *ngIf="getCapacityPercentage(ev.bookedCount, ev.maxCapacity) >= 100">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+            SOLD OUT
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
