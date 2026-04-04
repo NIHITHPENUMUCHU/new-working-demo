@@ -1,5 +1,7 @@
 package com.edutech.eventmanagementsystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat; // NEW
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties; // NEW
 import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.persistence.*;
 import java.util.Date;
@@ -19,10 +21,13 @@ public class Event {
     private String location;
     private String status;
     
-    // Kept as Date to match your original architecture perfectly
+    // CRITICAL FIX 1: Accepts "YYYY-MM-DD" exactly as Angular sends it
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date dateTime; 
 
+    // CRITICAL FIX 2: Prevents 500 StackOverflowError loop
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("event")
     private List<Allocation> allocations;
 
     // --- Capacity Engine Fields ---

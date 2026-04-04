@@ -36,22 +36,24 @@ public class ResourceService {
         return allocationRepository.findAll();
     }
 
-    // THE SIGNATURE: It explicitly requires an 'int quantity'
     public Allocation allocateResource(Long eventId, Long resourceId, int quantity) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
         Resource resource = resourceRepository.findById(resourceId).orElseThrow(() -> new RuntimeException("Resource not found"));
+
+        // CRITICAL FIX: Prevent over-allocation and negative inventory
+        if (quantity > resource.getQuantity()) {
+            throw new RuntimeException("Insufficient inventory. Only " + resource.getQuantity() + " items available.");
+        }
 
         Allocation allocation = new Allocation();
         allocation.setEvent(event);
         allocation.setResource(resource);
         allocation.setQuantity(quantity);
 
-        // Deduct the allocated amount from the inventory
-        int remainingQuantity = Math.max(0, resource.getQuantity() - quantity);
+        int remainingQuantity = resource.getQuantity() - quantity;
         resource.setQuantity(remainingQuantity);
 
-        // Only mark as unavailable if we completely run out of stock 
-        if (remainingQuantity <= 0) {
+        if (remainingQuantity == 0) {
             resource.setAvailability(false);
         }
         resourceRepository.save(resource);
