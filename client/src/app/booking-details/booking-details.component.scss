@@ -3,6 +3,7 @@
   --c-teal: #0D9488;
   --c-orange: #EA580C;
   --c-peach-light: #FFF7ED;
+  --c-peach: #FED7AA;
   
   display: block;
   min-height: 100vh;
@@ -107,6 +108,7 @@
   flex-direction: column;
   overflow: hidden;
   transition: transform 0.3s;
+  position: relative; /* REQUIRED for the absolute stamp */
 
   &:hover {
     transform: translateY(-5px);
@@ -115,6 +117,75 @@
 
   .card-header {
     padding: 20px 25px 0 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* NEW: Capacity Pill */
+  .capacity-pill {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--c-navy);
+    background: var(--c-peach);
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  /* NEW: The Premium Rubber Stamp */
+  .sold-out-stamp {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 2.2rem;
+    color: var(--c-orange);
+    border: 5px solid var(--c-orange);
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    letter-spacing: 4px;
+    background: rgba(255, 255, 255, 0.95);
+    pointer-events: none;
+    box-shadow: 0 8px 25px rgba(234, 88, 12, 0.2);
+    z-index: 10;
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
+  }
+
+  /* NEW: Grayscale and disable the card when sold out */
+  &.is-sold-out {
+    opacity: 0.8;
+    background: #f8fafc;
+    border-color: #cbd5e1;
+
+    h3 { color: #475569; }
+    .desc { color: #94a3b8; }
+    .meta-item { color: #64748b !important; }
+    
+    .status-badge {
+      background: #e2e8f0;
+      color: #64748b;
+    }
+
+    .btn-book {
+      background: #cbd5e1;
+      color: #64748b;
+      cursor: not-allowed;
+      box-shadow: none;
+
+      &:hover {
+        background: #cbd5e1;
+        transform: none;
+      }
+    }
+    
+    &:hover {
+      transform: none; /* Disables the hover lift effect */
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+    }
   }
 
   .card-body {
@@ -172,7 +243,7 @@
       transition: all 0.2s;
       font-family: 'Inter', sans-serif;
 
-      &:hover {
+      &:hover:not(:disabled) {
         background: #c2410c;
       }
     }
@@ -202,7 +273,7 @@
     box-shadow: none;
 
     .ticket-stub {
-      background: #64748b; /* Changes teal to grey */
+      background: #64748b;
     }
 
     .status-badge {
@@ -299,6 +370,9 @@
   margin-bottom: 25px;
   border-bottom: 1px solid #f1f5f9;
   padding-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 
   h3 {
     font-family: 'Montserrat', sans-serif;
@@ -435,12 +509,6 @@
 }
 
 /* --- Download PDF Button --- */
-.ticket-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
 .btn-download-pdf {
   display: flex;
   align-items: center;
@@ -467,20 +535,13 @@
 
 /* --- High-Res PDF / Print Engine Rules --- */
 @media print {
-  /* Hide the web-app UI elements */
   .page-header, 
   .tab-navigation, 
   .catalog-grid,
-  .empty-state { 
-    display: none !important; 
-  }
+  .empty-state { display: none !important; }
   
-  /* Hide all tickets EXCEPT the one being printed */
-  .digital-ticket:not(.print-target) { 
-    display: none !important; 
-  }
+  .digital-ticket:not(.print-target) { display: none !important; }
   
-  /* Format the selected ticket to look perfect on a white PDF page */
   .print-target {
     position: fixed;
     top: 50px;
@@ -492,11 +553,8 @@
     border-radius: 0 !important;
     page-break-inside: avoid;
     
-    .btn-download-pdf { 
-      display: none !important; /* Hide the button inside the PDF */
-    }
+    .btn-download-pdf { display: none !important; }
 
-    /* Enforce exact colors for the PDF generation */
     .ticket-stub {
       background: #0D9488 !important;
       -webkit-print-color-adjust: exact; 
@@ -504,4 +562,3 @@
     }
   }
 }
-

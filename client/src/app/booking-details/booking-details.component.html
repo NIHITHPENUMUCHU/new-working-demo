@@ -21,10 +21,15 @@
   <div class="catalog-grid animate-slide-up" *ngIf="activeTab === 'CATALOG'">
     <div class="empty-state" *ngIf="availableEvents.length === 0">No events currently open for booking.</div>
 
-    <div class="event-card" *ngFor="let ev of availableEvents">
+    <div class="event-card" *ngFor="let ev of availableEvents" [class.is-sold-out]="ev.bookedCount >= ev.maxCapacity">
+      
       <div class="card-header">
         <span class="status-badge" [ngClass]="ev.status?.toLowerCase()">{{ ev.status }}</span>
+        <span class="capacity-pill" *ngIf="ev.bookedCount < ev.maxCapacity">
+          {{ ev.maxCapacity - (ev.bookedCount || 0) }} Seats Left
+        </span>
       </div>
+      
       <div class="card-body">
         <h3>{{ ev.title }}</h3>
         <p class="desc">{{ ev.description }}</p>
@@ -41,9 +46,14 @@
               <circle cx="12" cy="10" r="3"></circle>
             </svg> {{ ev.location }}</div>
         </div>
+
+        <div class="sold-out-stamp" *ngIf="ev.bookedCount >= ev.maxCapacity">SOLD OUT</div>
       </div>
+      
       <div class="card-footer">
-        <button class="btn-book" (click)="bookTicket(ev)">Secure Entry Pass</button>
+        <button class="btn-book" [disabled]="ev.bookedCount >= ev.maxCapacity" (click)="bookTicket(ev)">
+          {{ ev.bookedCount >= ev.maxCapacity ? 'Event Full' : 'Secure Entry Pass' }}
+        </button>
       </div>
     </div>
   </div>

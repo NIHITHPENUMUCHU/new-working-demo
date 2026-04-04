@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { HttpService } from '../../services/http.service';
@@ -8,25 +8,25 @@ import { HttpService } from '../../services/http.service';
   templateUrl: './dashbaord.component.html',
   styleUrls: ['./dashbaord.component.scss']
 })
-export class DashbaordComponent implements OnInit {
+export class DashbaordComponent implements OnInit, OnDestroy {
   roleName: string | null = null;
   currentDate: Date = new Date();
   
-  // User Identity Variables
   username: string = 'User';
   lastLogin: Date = new Date(); 
   
-  // System Metrics
   totalEvents: number = 0; scheduledEvents: number = 0; ongoingEvents: number = 0; completedEvents: number = 0;
   availableResources: number = 0; totalResources: number = 0; totalAllocations: number = 0;
 
-  // Client FAQ
   showFAQ: boolean = false; activeFaqIndex: number | null = null;
   faqs = [
     { question: 'How do I use this dashboard?', answer: 'Click "Retrieve Booking" to search for your event.' },
     { question: 'Can I purchase tickets directly here?', answer: 'EventMaster Pro operates as a B2B management system.' },
     { question: 'What does "Ongoing" status mean?', answer: 'Staff has actively set up the venue and operations are live!' }
   ];
+
+  // Background Sync Tracker
+  private pollingInterval: any;
 
   constructor(private authService: AuthService, private router: Router, private httpService: HttpService) {}
 
@@ -36,7 +36,6 @@ export class DashbaordComponent implements OnInit {
     const rawRole = this.authService.getRole();
     this.roleName = rawRole ? rawRole.toUpperCase() : null;
 
-    // 1. Fetch exact Username
     const storedName = localStorage.getItem('username');
     let rawUsernameForKeys = 'unknown_user'; 
 
@@ -50,20 +49,30 @@ export class DashbaordComponent implements OnInit {
       else this.username = 'User';
     }
 
-    // 2. THE FIX: Read the PREVIOUS login time that we rotated in the Login Component!
     const previousLoginKey = 'previousLogin_' + rawUsernameForKeys; 
     const storedPreviousLogin = localStorage.getItem(previousLoginKey);
 
     if (storedPreviousLogin) {
       this.lastLogin = new Date(storedPreviousLogin);
     } else {
-      // Emergency fallback just in case memory was cleared
       const currentLogin = localStorage.getItem('lastLogin_' + rawUsernameForKeys);
       this.lastLogin = currentLogin ? new Date(currentLogin) : new Date();
     }
 
     if (this.roleName === 'PLANNER') {
       this.fetchLiveMetrics();
+      
+      // CRITICAL FIX: Live Dashboard Auto-Refresh
+      this.pollingInterval = setInterval(() => {
+        this.fetchLiveMetrics();
+      }, 5000);
+    }
+  }
+
+  // Prevents memory leaks when navigating away
+  ngOnDestroy(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
     }
   }
 

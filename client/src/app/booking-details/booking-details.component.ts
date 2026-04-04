@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpService } from '../../services/http.service';
 
@@ -7,15 +7,16 @@ import { HttpService } from '../../services/http.service';
   templateUrl: './booking-details.component.html',
   styleUrls: ['./booking-details.component.scss']
 })
-export class BookingDetailsComponent implements OnInit {
+export class BookingDetailsComponent implements OnInit, OnDestroy {
   
   activeTab: string = 'CATALOG'; 
   availableEvents: any[] = [];
   myTickets: any[] = [];
   username: string = '';
-
-  // NEW: Tracks which ticket is being exported to PDF
   printingTicketId: any = null;
+
+  // Background Sync Tracker
+  private pollingInterval: any; 
 
   constructor(public router: Router, public httpService: HttpService) { }
 
@@ -23,6 +24,23 @@ export class BookingDetailsComponent implements OnInit {
     this.username = localStorage.getItem('username') || 'client';
     this.fetchActiveEvents();
     this.loadMyTickets();
+
+    // CRITICAL FIX: Background Sync Engine
+    // Fetches fresh data every 5 seconds without interrupting the user
+    this.pollingInterval = setInterval(() => {
+      if (this.activeTab === 'CATALOG') {
+        this.fetchActiveEvents();
+      } else {
+        this.syncTicketsWithDatabase();
+      }
+    }, 5000); 
+  }
+
+  // Prevents memory leaks when navigating away
+  ngOnDestroy(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
   }
 
   fetchActiveEvents(): void {
@@ -90,15 +108,10 @@ export class BookingDetailsComponent implements OnInit {
     else if (tab === 'CATALOG') this.fetchActiveEvents();
   }
 
-  // NEW FEATURE: High-Res PDF Generator (No Libraries Needed!)
   printTicket(ticket: any): void {
-    // Isolate the specific ticket by ID
     this.printingTicketId = ticket.uniqueTicketId || ticket.eventID || ticket.id;
-    
-    // Give Angular a split-second to apply the CSS isolation classes, then trigger print
     setTimeout(() => {
       window.print();
-      // Restore the screen as soon as the print/PDF dialog closes
       this.printingTicketId = null;
     }, 150);
   }

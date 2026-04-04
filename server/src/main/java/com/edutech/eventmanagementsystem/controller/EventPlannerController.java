@@ -3,6 +3,8 @@ package com.edutech.eventmanagementsystem.controller;
 import com.edutech.eventmanagementsystem.entity.Allocation;
 import com.edutech.eventmanagementsystem.entity.Event;
 import com.edutech.eventmanagementsystem.entity.Resource;
+import com.edutech.eventmanagementsystem.entity.Notification;
+import com.edutech.eventmanagementsystem.repository.NotificationRepository;
 import com.edutech.eventmanagementsystem.service.EventService;
 import com.edutech.eventmanagementsystem.service.ResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,9 @@ public class EventPlannerController {
 
     @Autowired
     private ResourceService resourceService;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @PostMapping("/event")
     public ResponseEntity<Event> createEvent(@RequestBody Event event) {
@@ -42,14 +47,12 @@ public class EventPlannerController {
         return ResponseEntity.ok(resourceService.getAllResources());
     }
 
-    // THE FIX: Uses @PathVariable to match Angular's URL perfectly!
     @PostMapping("/allocate-resource/{eventId}/{resourceId}")
     public ResponseEntity<Allocation> allocateResource(
             @PathVariable("eventId") Long eventId,
             @PathVariable("resourceId") Long resourceId,
             @RequestBody Allocation allocation) {
         
-        // This now perfectly matches the ResourceService signature!
         return ResponseEntity.ok(resourceService.allocateResource(eventId, resourceId, allocation.getQuantity()));
     }
 
@@ -58,33 +61,29 @@ public class EventPlannerController {
         return ResponseEntity.ok(resourceService.getAllAllocations()); 
     }
 
-    // --- NOTIFICATION ENDPOINTS ---
-    @Autowired
-    private com.edutech.eventmanagementsystem.repository.NotificationRepository notificationRepository;
-
+    // --- NOTIFICATION ENDPOINTS FOR PLANNER DASHBOARD ---
+    
     @GetMapping("/notifications")
-    public org.springframework.http.ResponseEntity<java.util.List<com.edutech.eventmanagementsystem.entity.Notification>> getPlannerNotifications() {
-        return org.springframework.http.ResponseEntity
-                .ok(notificationRepository.findByTargetRoleOrderByIdDesc("PLANNER"));
+    public ResponseEntity<List<Notification>> getPlannerNotifications() {
+        return ResponseEntity.ok(notificationRepository.findByTargetRoleOrderByIdDesc("PLANNER"));
     }
 
     @PutMapping("/notifications/{id}/read")
-    public org.springframework.http.ResponseEntity<?> markNotificationRead(@PathVariable Long id) {
-        com.edutech.eventmanagementsystem.entity.Notification notif = notificationRepository.findById(id)
+    public ResponseEntity<?> markNotificationRead(@PathVariable Long id) {
+        Notification notif = notificationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Not found"));
         notif.setIsRead(true);
         notificationRepository.save(notif);
-        return org.springframework.http.ResponseEntity.ok().build();
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/notifications/read-all")
-    public org.springframework.http.ResponseEntity<?> markAllNotificationsRead() {
-        java.util.List<com.edutech.eventmanagementsystem.entity.Notification> notifs = notificationRepository
-                .findByTargetRoleOrderByIdDesc("PLANNER");
-        for (com.edutech.eventmanagementsystem.entity.Notification n : notifs) {
+    public ResponseEntity<?> markAllNotificationsRead() {
+        List<Notification> notifs = notificationRepository.findByTargetRoleOrderByIdDesc("PLANNER");
+        for (Notification n : notifs) {
             n.setIsRead(true);
         }
         notificationRepository.saveAll(notifs);
-        return org.springframework.http.ResponseEntity.ok().build();
+        return ResponseEntity.ok().build();
     }
 }

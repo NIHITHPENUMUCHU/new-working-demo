@@ -10,22 +10,26 @@ import { ViewEventsComponent } from './view-events/view-events.component';
 import { BookingDetailsComponent } from './booking-details/booking-details.component';
 import { LiveTicketingComponent } from './live-ticketing/live-ticketing.component';
 
+// Import BOTH Guards
+import { AuthGuard } from '../services/auth.guard'; 
+import { NoAuthGuard } from '../services/no-auth.guard'; // NEW
+
 const routes: Routes = [
-  // Default route pushes the user to the login screen
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   
-  // Explicit feature routes
-  { path: 'login', component: LoginComponent },
-  { path: 'registration', component: RegistrationComponent },
-  { path: 'dashboard', component: DashbaordComponent },
-  { path: 'create-event', component: CreateEventComponent },
-  { path: 'add-resource', component: AddResourceComponent },
-  { path: 'resource-allocate', component: ResourceAllocateComponent },
-  { path: 'view-events', component: ViewEventsComponent },
-  { path: 'booking-details', component: BookingDetailsComponent },
-  { path: 'live-ticketing', component: LiveTicketingComponent },
+  // Public Routes (Protected by NoAuthGuard to prevent logged-in users from seeing them)
+  { path: 'login', component: LoginComponent, canActivate: [NoAuthGuard] },
+  { path: 'registration', component: RegistrationComponent, canActivate: [NoAuthGuard] },
+  
+  // Protected Routes (Protected by AuthGuard to prevent logged-out users from seeing them)
+  { path: 'dashboard', component: DashbaordComponent, canActivate: [AuthGuard] },
+  { path: 'create-event', component: CreateEventComponent, canActivate: [AuthGuard] },
+  { path: 'add-resource', component: AddResourceComponent, canActivate: [AuthGuard] },
+  { path: 'resource-allocate', component: ResourceAllocateComponent, canActivate: [AuthGuard] },
+  { path: 'view-events', component: ViewEventsComponent, canActivate: [AuthGuard] },
+  { path: 'booking-details', component: BookingDetailsComponent, canActivate: [AuthGuard] },
+  { path: 'live-ticketing', component: LiveTicketingComponent, canActivate: [AuthGuard] },
 
-  // Wildcard fallback if the user types a bad URL
   { path: '**', redirectTo: 'login' }
 ];
 
@@ -34,4 +38,3 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
-
