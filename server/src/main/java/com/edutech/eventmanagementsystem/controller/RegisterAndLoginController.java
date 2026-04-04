@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -29,15 +30,29 @@ public class RegisterAndLoginController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.registerUser(user));
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        try {
+            User savedUser = userService.registerUser(user);
+            return ResponseEntity.ok(savedUser);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(400).body(error);
+        }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) throws Exception {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
+        } catch (Exception e) {
+            // CRITICAL FIX: Safely catches bad logins and informs Angular
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Incorrect username or password");
+            return ResponseEntity.status(401).body(error);
+        }
 
         final UserDetails userDetails = userService.loadUserByUsername(request.getUsername());
         final String token = jwtUtil.generateToken(userDetails.getUsername());
@@ -46,12 +61,11 @@ public class RegisterAndLoginController {
         return ResponseEntity.ok(new LoginResponse(token, user.getRole()));
     }
 
-    // NEW: OTP Endpoints
     @PostMapping("/generate-otp")
     public ResponseEntity<?> generateOtp(@RequestBody Map<String, String> payload) {
         try {
             userService.generateAndSendOtp(payload.get("email"));
-            return ResponseEntity.ok().body("{\"message\": \"OTP sent successfully\"}");
+            return ResponseEntity.ok().body("{\"message\": \"OTP sent successfully to your email.\"}");
         } catch (Exception e) {
             return ResponseEntity.status(400).body("{\"message\": \"" + e.getMessage() + "\"}");
         }
@@ -65,9 +79,10 @@ public class RegisterAndLoginController {
                 payload.get("otp"), 
                 payload.get("newPassword")
             );
-            return ResponseEntity.ok().body("{\"message\": \"Password reset successfully\"}");
+            return ResponseEntity.ok().body("{\"message\": \"Password reset successfully.\"}");
         } catch (Exception e) {
             return ResponseEntity.status(400).body("{\"message\": \"" + e.getMessage() + "\"}");
         }
     }
+
 }

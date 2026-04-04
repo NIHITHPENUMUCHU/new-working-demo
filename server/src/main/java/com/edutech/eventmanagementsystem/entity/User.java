@@ -12,11 +12,15 @@ public class User {
     private Long id;
 
     private String username;
+
+    // CRITICAL FIX: Enforces unique emails at the database level
+    @Column(unique = true)
     private String email;
+    
     private String password;
     private String role;
 
-    // NEW: Fields for OTP tracking
+    // Fields for OTP tracking
     private String resetOtp;
     private Date otpExpiryTime;
 

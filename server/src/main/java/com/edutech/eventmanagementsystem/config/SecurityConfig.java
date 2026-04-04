@@ -5,7 +5,7 @@ import com.edutech.eventmanagementsystem.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod; // NEW
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,6 +14,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+// NEW IMPORTS FOR CORS
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -39,13 +44,32 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
+    // =========================================================
+    // CRITICAL FIX: The CORS Filter Bean
+    // This explicitly tells Spring Boot to allow requests from your Angular frontend
+    // =========================================================
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(false);
+        config.addAllowedOriginPattern("*"); 
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        // CRITICAL FIX: Added cors() and OPTIONS permitAll
+        // Enforces the cors() configuration we set up above
         http.cors().and().csrf().disable()
             .authorizeRequests()
+            // Allows pre-flight checks from the browser
             .antMatchers(HttpMethod.OPTIONS, "/**").permitAll() 
+            // Opens the doors for Login, Registration, and Forgot Password
             .antMatchers("/api/user/register", "/api/user/login", "/api/user/generate-otp", "/api/user/reset-with-otp").permitAll()
+            // Role-based protection for the rest of the application
             .antMatchers("/api/planner/**").hasAuthority("PLANNER")
             .antMatchers("/api/staff/**").hasAuthority("STAFF")
             .antMatchers("/api/client/**").hasAuthority("CLIENT")

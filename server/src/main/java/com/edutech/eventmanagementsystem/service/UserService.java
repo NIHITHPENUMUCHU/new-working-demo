@@ -3,8 +3,6 @@ package com.edutech.eventmanagementsystem.service;
 import com.edutech.eventmanagementsystem.entity.User;
 import com.edutech.eventmanagementsystem.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -26,25 +24,29 @@ public class UserService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private JavaMailSender mailSender;
+    private GmailService gmailService;
 
     public User registerUser(User user) {
-        // FIXED: Uses isPresent() for Optional
+        // 1. Check if username is taken
         if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new RuntimeException("Username already exists");
         }
+        
+        // CRITICAL FIX: 2. Check if email is already taken
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new RuntimeException("An account with this email already exists");
+        }
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
     public User findByUsername(String username) {
-        // FIXED: Uses orElse(null) for Optional
         return userRepository.findByUsername(username).orElse(null);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // FIXED: Uses orElseThrow() for Optional
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         
@@ -56,27 +58,24 @@ public class UserService implements UserDetailsService {
     }
 
     public void generateAndSendOtp(String email) {
-        // FIXED: Uses orElse(null)
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
             throw new RuntimeException("No account found with that email address.");
         }
 
+        // Generate a random 6-digit OTP
         String otp = String.format("%06d", new Random().nextInt(999999));
         
+        // Save the OTP and expiry time (10 minutes) to the database
         user.setResetOtp(otp);
         user.setOtpExpiryTime(new Date(System.currentTimeMillis() + 10 * 60 * 1000));
         userRepository.save(user);
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(user.getEmail());
-        message.setSubject("EventMaster Pro - Password Reset Code");
-        message.setText("Your secure password reset code is: " + otp + "\n\nThis code will expire in 10 minutes.");
-        mailSender.send(message);
+        // Call our dedicated GmailService to physically send the email
+        gmailService.sendOtpEmail(user.getEmail(), otp);
     }
 
     public void resetPasswordWithOtp(String email, String otp, String newPassword) {
-        // FIXED: Uses orElse(null)
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) throw new RuntimeException("User not found.");
 
@@ -88,6 +87,7 @@ public class UserService implements UserDetailsService {
             throw new RuntimeException("OTP has expired. Please request a new one.");
         }
 
+        // Hash the new password and clear the OTP fields
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setResetOtp(null);
         user.setOtpExpiryTime(null);
