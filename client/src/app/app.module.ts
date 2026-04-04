@@ -14,6 +14,7 @@ import { ResourceAllocateComponent } from './resource-allocate/resource-allocate
 import { ViewEventsComponent } from './view-events/view-events.component';
 import { BookingDetailsComponent } from './booking-details/booking-details.component';
 import { LiveTicketingComponent } from './live-ticketing/live-ticketing.component';
+import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 
 @NgModule({
   declarations: [
@@ -26,8 +27,13 @@ import { LiveTicketingComponent } from './live-ticketing/live-ticketing.componen
     ResourceAllocateComponent,
     ViewEventsComponent,
     BookingDetailsComponent,
-    LiveTicketingComponent // <-- ADD IT HERE!
+    LiveTicketingComponent,
+    ForgotPasswordComponent
+
   ],
+
+  
+
   imports: [
     BrowserModule,
     AppRoutingModule,

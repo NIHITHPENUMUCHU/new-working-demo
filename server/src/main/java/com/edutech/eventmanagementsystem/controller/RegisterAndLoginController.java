@@ -5,15 +5,14 @@ import com.edutech.eventmanagementsystem.dto.LoginResponse;
 import com.edutech.eventmanagementsystem.entity.User;
 import com.edutech.eventmanagementsystem.jwt.JwtUtil;
 import com.edutech.eventmanagementsystem.service.UserService;
-import com.edutech.eventmanagementsystem.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user")
@@ -21,53 +20,54 @@ import org.springframework.web.bind.annotation.*;
 public class RegisterAndLoginController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
-    private UserRepository userRepository;
+    private AuthenticationManager authenticationManager;
 
     @Autowired
     private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
-        
-        // 1. Check if the username is already taken
-        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already exists");
-        }
-        
-        // 2. Check if the email is already taken
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email already exists");
-        }
-
-        // 3. If no duplicates are found, proceed with saving the user
+    public ResponseEntity<User> registerUser(@RequestBody User user) {
         return ResponseEntity.ok(userService.registerUser(user));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> createAuthToken(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) throws Exception {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+        );
+
+        final UserDetails userDetails = userService.loadUserByUsername(request.getUsername());
+        final String token = jwtUtil.generateToken(userDetails.getUsername());
+        User user = userService.findByUsername(request.getUsername());
+
+        return ResponseEntity.ok(new LoginResponse(token, user.getRole()));
+    }
+
+    // NEW: OTP Endpoints
+    @PostMapping("/generate-otp")
+    public ResponseEntity<?> generateOtp(@RequestBody Map<String, String> payload) {
         try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
-            );
-        } catch (BadCredentialsException e) {
-            // REQUIRED FOR TEST CASE 6
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect username or password");
+            userService.generateAndSendOtp(payload.get("email"));
+            return ResponseEntity.ok().body("{\"message\": \"OTP sent successfully\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body("{\"message\": \"" + e.getMessage() + "\"}");
         }
+    }
 
-        final UserDetails userDetails = userService.loadUserByUsername(loginRequest.getUsername());
-        final String jwt = jwtUtil.generateToken(userDetails.getUsername());
-        
-        // Fetch the user from the database to get their true role
-        // Since authentication succeeded above, we know this user exists, so .get() is safe to use.
-        User loggedInUser = userRepository.findByUsername(loginRequest.getUsername()).get();
-
-        // Return the JWT token AND the role back to Angular
-        return ResponseEntity.ok(new LoginResponse(jwt, loggedInUser.getRole()));
+    @PostMapping("/reset-with-otp")
+    public ResponseEntity<?> resetWithOtp(@RequestBody Map<String, String> payload) {
+        try {
+            userService.resetPasswordWithOtp(
+                payload.get("email"), 
+                payload.get("otp"), 
+                payload.get("newPassword")
+            );
+            return ResponseEntity.ok().body("{\"message\": \"Password reset successfully\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body("{\"message\": \"" + e.getMessage() + "\"}");
+        }
     }
 }

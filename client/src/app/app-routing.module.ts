@@ -9,6 +9,7 @@ import { ResourceAllocateComponent } from './resource-allocate/resource-allocate
 import { ViewEventsComponent } from './view-events/view-events.component';
 import { BookingDetailsComponent } from './booking-details/booking-details.component';
 import { LiveTicketingComponent } from './live-ticketing/live-ticketing.component';
+import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 
 // Import BOTH Guards
 import { AuthGuard } from '../services/auth.guard'; 
@@ -20,7 +21,8 @@ const routes: Routes = [
   // Public Routes (Protected by NoAuthGuard to prevent logged-in users from seeing them)
   { path: 'login', component: LoginComponent, canActivate: [NoAuthGuard] },
   { path: 'registration', component: RegistrationComponent, canActivate: [NoAuthGuard] },
-  
+  { path: 'forgot-password', component: ForgotPasswordComponent, canActivate: [NoAuthGuard] },
+
   // Protected Routes (Protected by AuthGuard to prevent logged-out users from seeing them)
   { path: 'dashboard', component: DashbaordComponent, canActivate: [AuthGuard] },
   { path: 'create-event', component: CreateEventComponent, canActivate: [AuthGuard] },

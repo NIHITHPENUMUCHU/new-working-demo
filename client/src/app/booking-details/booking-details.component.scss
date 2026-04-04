@@ -3,7 +3,6 @@
   --c-teal: #0D9488;
   --c-orange: #EA580C;
   --c-peach-light: #FFF7ED;
-  --c-peach: #FED7AA;
   
   display: block;
   min-height: 100vh;
@@ -122,18 +121,18 @@
     align-items: center;
   }
 
-  /* NEW: Capacity Pill */
+  /* Capacity Pill */
   .capacity-pill {
     font-size: 0.75rem;
     font-weight: 800;
     color: var(--c-navy);
-    background: var(--c-peach);
+    background: #FED7AA;
     padding: 0.3rem 0.8rem;
     border-radius: 12px;
     letter-spacing: 0.5px;
   }
 
-  /* NEW: The Premium Rubber Stamp */
+  /* The Premium Rubber Stamp */
   .sold-out-stamp {
     position: absolute;
     top: 45%;
@@ -155,7 +154,7 @@
     backdrop-filter: blur(4px);
   }
 
-  /* NEW: Grayscale and disable the card when sold out */
+  /* Grayscale and disable the card when sold out */
   &.is-sold-out {
     opacity: 0.8;
     background: #f8fafc;
@@ -243,7 +242,7 @@
       transition: all 0.2s;
       font-family: 'Inter', sans-serif;
 
-      &:hover:not(:disabled) {
+      &:hover {
         background: #c2410c;
       }
     }
@@ -273,7 +272,7 @@
     box-shadow: none;
 
     .ticket-stub {
-      background: #64748b;
+      background: #64748b; /* Changes teal to grey */
     }
 
     .status-badge {
@@ -370,9 +369,6 @@
   margin-bottom: 25px;
   border-bottom: 1px solid #f1f5f9;
   padding-bottom: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
 
   h3 {
     font-family: 'Montserrat', sans-serif;
@@ -509,6 +505,12 @@
 }
 
 /* --- Download PDF Button --- */
+.ticket-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
 .btn-download-pdf {
   display: flex;
   align-items: center;
@@ -533,32 +535,124 @@
   }
 }
 
-/* --- High-Res PDF / Print Engine Rules --- */
-@media print {
-  .page-header, 
-  .tab-navigation, 
-  .catalog-grid,
-  .empty-state { display: none !important; }
-  
-  .digital-ticket:not(.print-target) { display: none !important; }
-  
-  .print-target {
-    position: fixed;
-    top: 50px;
-    left: 5%;
-    width: 90%;
-    margin: 0 !important;
-    box-shadow: none !important;
-    border: 2px solid #000 !important;
-    border-radius: 0 !important;
-    page-break-inside: avoid;
-    
-    .btn-download-pdf { display: none !important; }
 
-    .ticket-stub {
-      background: #0D9488 !important;
-      -webkit-print-color-adjust: exact; 
-      print-color-adjust: exact;
-    }
+/* --- Premium High-Res PDF Engine Rules (Visibility Isolation Fix) --- */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0; /* Removes default browser URLs and page numbers */
+  }
+
+  /* 1. Paint the entire A4 paper with the Navy Theme */
+  body {
+    background-color: #0F172A !important; 
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 2. THE FIX: Hide absolutely EVERYTHING on the screen by default */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* 3. Make ONLY the printed ticket and its inner details visible */
+  .print-target, .print-target * {
+    visibility: visible !important;
+  }
+
+  /* 4. Pull the ticket out of the layout and perfectly center it */
+  .print-target {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    
+    /* Using negative margins instead of transform prevents Chrome layout bugs */
+    margin-top: -55mm !important;  /* Exactly half of the 110mm height */
+    margin-left: -120mm !important; /* Exactly half of the 240mm width */
+    width: 240mm !important;
+    height: 110mm !important;
+    
+    display: flex !important;
+    background: #ffffff !important;
+    border: 4px solid #0D9488 !important; /* Teal Theme */
+    border-radius: 20px !important;
+    box-shadow: none !important; /* Shadows cause blur in PDFs */
+    page-break-inside: avoid !important;
+  }
+
+  /* --- BRAND INJECTION: App Name & Logo --- */
+  .ticket-top {
+    position: relative;
+    padding-top: 35px !important; /* Makes room for the injected logo */
+  }
+
+  /* Injects the App Branding directly into the top of the ticket */
+  .ticket-top::before {
+    content: '❖ EVENTMASTER PRO';
+    position: absolute;
+    top: -5px;
+    left: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 15px;
+    color: #0D9488 !important; /* Teal Theme */
+    letter-spacing: 4px;
+    visibility: visible !important;
+  }
+
+  /* Injects 'OFFICIAL PASS' into the stub */
+  .stub-header::before {
+    content: 'OFFICIAL PASS';
+    display: block;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    color: #0F172A !important;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+    visibility: visible !important;
+  }
+
+  /* --- COLOR ENFORCEMENT & STYLING --- */
+  .ticket-stub {
+    background: #0D9488 !important; /* Teal */
+    color: #FFF7ED !important; /* Peach Light */
+    border-right: 4px dashed #0F172A !important; /* Navy Cut-line */
+    width: 30% !important;
+    justify-content: center !important;
+    gap: 20px !important;
+  }
+
+  .ticket-body {
+    width: 70% !important;
+    padding: 30px 40px !important;
+  }
+
+  .btn-download-pdf { display: none !important; } /* Hide the button inside the PDF */
+
+  .ticket-top h3 { 
+    color: #EA580C !important; /* Orange */ 
+    font-size: 2.2rem !important;
+  }
+  
+  .status-badge { 
+    background: #0F172A !important; 
+    color: #fff !important; 
+    font-size: 14px !important;
+    border: none !important;
+  }
+  
+  .detail-block label { color: #0D9488 !important; }
+  .highlight-text { color: #0F172A !important; }
+
+  /* Sharpen the fake barcode for physical prints */
+  .ticket-barcode {
+    opacity: 1 !important;
+    background-image: repeating-linear-gradient(
+      to right,
+      #0F172A 0, #0F172A 4px,
+      transparent 4px, transparent 8px,
+      #0F172A 8px, #0F172A 12px,
+      transparent 12px, transparent 16px
+    ) !important;
   }
 }

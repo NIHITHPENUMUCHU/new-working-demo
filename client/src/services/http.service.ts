@@ -26,6 +26,14 @@ export class HttpService {
   registerUser(details: any): Observable<any> {
     return this.http.post(`${this.serverName}/api/user/register`, details);
   }
+  
+  generateOtp(payload: any): Observable<any> {
+    return this.http.post(this.serverName + '/api/user/generate-otp', payload);
+  }
+
+  resetWithOtp(payload: any): Observable<any> {
+    return this.http.post(this.serverName + '/api/user/reset-with-otp', payload);
+  }
 
   // --- PLANNER ENDPOINTS ---
   createEvent(details: any): Observable<any> {
