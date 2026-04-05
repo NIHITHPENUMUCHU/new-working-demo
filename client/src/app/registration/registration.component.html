@@ -49,8 +49,8 @@
           <div class="input-wrapper">
             <select formControlName="role">
               <option value="" disabled selected>-- Select an Access Level --</option>
-              <option value="CLIENT">Client</option>
-              <option value="STAFF">Staff Member</option>
+              <option value="CLIENT">Client / Attendee</option>
+              <option value="STAFF">Operations Staff</option>
               <option value="PLANNER">Event Planner</option>
             </select>
           </div>
@@ -60,7 +60,7 @@
         </div>
 
         <div class="form-group" *ngIf="itemForm.get('role')?.value === 'PLANNER' || itemForm.get('role')?.value === 'STAFF'">
-          <label>Authorization Passcode</label>
+          <label style="color: var(--c-orange)">Authorization Passcode</label>
           <div class="input-wrapper">
             <svg class="input-icon auth-shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
@@ -69,17 +69,15 @@
             </svg>
             <input type="password" formControlName="authCode" placeholder="Enter administrative passcode">
           </div>
-          
           <div *ngIf="itemForm.get('authCode')?.touched && itemForm.get('authCode')?.invalid" class="validation-error">
             <span *ngIf="itemForm.get('authCode')?.errors?.['required']">A security passcode is required for this role.</span>
             <span *ngIf="itemForm.get('authCode')?.errors?.['pattern']">Invalid passcode. Access Denied.</span>
           </div>
         </div>
 
-        <div *ngIf="itemForm.get('role')?.value === 'PLANNER' || itemForm.get('role')?.value === 'STAFF'">
-          
-          <div style="margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
-            <h4 style="color: var(--c-teal); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Account Recovery Setup</h4>
+        <div *ngIf="itemForm.get('role')?.value">
+          <div style="margin-top: 30px; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+            <label style="color: var(--c-teal); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Account Recovery Setup</label>
           </div>
 
           <div class="form-group">
@@ -122,7 +120,9 @@
           </div>
         </div>
 
-        <button type="submit" class="auth-btn" [disabled]="!itemForm.valid">Create Account</button>
+        <button type="submit" class="auth-btn" [disabled]="!itemForm.valid || isLoading">
+          {{ isLoading ? 'Initializing...' : 'Create Account' }}
+        </button>
       </form>
 
       <div class="auth-footer">

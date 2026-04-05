@@ -15,7 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-// NEW IMPORTS FOR CORS
+// IMPORTS FOR CORS
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -63,8 +63,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests()
             // Allows pre-flight checks from the browser
             .antMatchers(HttpMethod.OPTIONS, "/**").permitAll() 
-            // Opens the doors for Login, Registration, and Forgot Password
-            .antMatchers("/api/user/register", "/api/user/login", "/api/user/generate-otp", "/api/user/reset-with-otp").permitAll()
+            // Opens the doors for Login, Registration, and the new Security Question Password Reset
+            .antMatchers("/api/user/register", "/api/user/login", "/api/user/forgot-password/**").permitAll()
             // Role-based protection for the rest of the application
             .antMatchers("/api/planner/**").hasAuthority("PLANNER")
             .antMatchers("/api/staff/**").hasAuthority("STAFF")
