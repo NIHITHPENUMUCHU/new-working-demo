@@ -41,13 +41,23 @@
           <span class="validation-error" *ngIf="itemForm.get('location')?.touched && itemForm.get('location')?.invalid">Required</span>
         </div>
 
-                <div class="form-group">
+        <div class="form-group">
+          <label>Assign Operations Staff</label>
+          <select formControlName="assignedStaffUsername" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; font-family: 'Inter', sans-serif;">
+            <option value="">Public - Any Available Staff</option>
+            <option *ngFor="let staff of staffList" [value]="staff.username">
+              {{ staff.username | titlecase }} ({{ staff.email }})
+            </option>
+          </select>
+          <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 4px;">Restrict operational access to a specific staff member.</small>
+        </div>
+
+        <div class="form-group">
           <label>Maximum Attendee Capacity</label>
           <input type="number" formControlName="maxCapacity" placeholder="e.g., 100" min="1">
           <small style="color: #64748b; font-size: 0.75rem;">Set the limit for Client ticket bookings.</small>
           <span class="validation-error" *ngIf="itemForm.get('maxCapacity')?.touched && itemForm.get('maxCapacity')?.invalid">Must be at least 1.</span>
         </div>
-
 
         <button type="submit" class="btn-primary" [disabled]="!itemForm.valid">Initialize Event</button>
       </form>
@@ -62,7 +72,7 @@
               <th>ID</th>
               <th>Event Title</th>
               <th>Date</th>
-              <th>Location</th>
+              <th>Assigned Staff</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -70,17 +80,17 @@
             <tr *ngFor="let event of paginatedEventList">
               <td class="id-col">#{{ event.eventID || event.id || '...' }}</td>
               <td class="fw-bold">{{ event.title || event.name }}</td>
-              
               <td>
                 <span *ngIf="event.dateTime || event.datetime || event.eventDate">
                   {{ (event.dateTime || event.datetime || event.eventDate) | date:'mediumDate' }}
                 </span>
-                <span *ngIf="!(event.dateTime || event.datetime || event.eventDate)" style="color: #94a3b8; font-style: italic;">
-                  Not Set
-                </span>
+                <span *ngIf="!(event.dateTime || event.datetime || event.eventDate)" style="color: #94a3b8; font-style: italic;">Not Set</span>
               </td>
               
-              <td>{{ event.location }}</td>
+              <td style="color: #EA580C; font-weight: 600;">
+                {{ event.assignedStaffUsername ? (event.assignedStaffUsername | titlecase) : 'Any Staff' }}
+              </td>
+              
               <td><span class="status-badge" [ngClass]="event.status?.toLowerCase()">{{ event.status }}</span></td>
             </tr>
             <tr *ngIf="eventList.length === 0">

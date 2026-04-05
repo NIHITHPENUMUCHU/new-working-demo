@@ -1,8 +1,7 @@
 package com.edutech.eventmanagementsystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat; // NEW
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties; // NEW
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
@@ -11,21 +10,27 @@ import java.util.List;
 @Table(name = "events")
 public class Event {
     
+    // FIX 1: Standardized to "id" so the frontend table and EventService can read it perfectly
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonProperty("eventID")
-    private Long eventID;
+    private Long id;
     
     private String title;
     private String description;
     private String location;
     private String status;
     
-    // CRITICAL FIX 1: Accepts "YYYY-MM-DD" exactly as Angular sends it
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date dateTime; 
 
-    // CRITICAL FIX 2: Prevents 500 StackOverflowError loop
+    // FIX 2: Added back the Micro-Permission fields required by EventService
+    @Column(name = "planner_username")
+    private String plannerUsername;
+
+    @Column(name = "assigned_staff_username")
+    private String assignedStaffUsername;
+
+    // FIX 3: Using your excellent JsonIgnoreProperties to restore allocations without crashing
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("event")
     private List<Allocation> allocations;
@@ -36,9 +41,9 @@ public class Event {
 
     public Event() {}
 
-    // Core Getters & Setters
-    public Long getEventID() { return eventID; }
-    public void setEventID(Long eventID) { this.eventID = eventID; }
+    // --- Core Getters & Setters ---
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -58,10 +63,17 @@ public class Event {
     public List<Allocation> getAllocations() { return allocations; }
     public void setAllocations(List<Allocation> allocations) { this.allocations = allocations; }
 
-    // Capacity Getters & Setters
+    // --- Capacity Getters & Setters ---
     public Integer getMaxCapacity() { return maxCapacity; }
     public void setMaxCapacity(Integer maxCapacity) { this.maxCapacity = maxCapacity; }
 
     public Integer getBookedCount() { return bookedCount; }
     public void setBookedCount(Integer bookedCount) { this.bookedCount = bookedCount; }
+
+    // --- Micro-Permissions Getters & Setters ---
+    public String getPlannerUsername() { return plannerUsername; }
+    public void setPlannerUsername(String plannerUsername) { this.plannerUsername = plannerUsername; }
+
+    public String getAssignedStaffUsername() { return assignedStaffUsername; }
+    public void setAssignedStaffUsername(String assignedStaffUsername) { this.assignedStaffUsername = assignedStaffUsername; }
 }

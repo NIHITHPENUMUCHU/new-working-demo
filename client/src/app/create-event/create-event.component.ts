@@ -10,6 +10,8 @@ import { HttpService } from '../../services/http.service';
 export class CreateEventComponent implements OnInit {
   itemForm!: FormGroup;
   eventList: any[] = [];
+  staffList: any[] = []; // NEW: Holds the staff members for the dropdown
+
   showMessage: boolean = false;
   responseMessage: string = '';
   showError: boolean = false;
@@ -28,10 +30,17 @@ export class CreateEventComponent implements OnInit {
       description: ['', Validators.required],
       dateTime: ['', Validators.required], 
       location: ['', Validators.required],
-      maxCapacity: [100, [Validators.required, Validators.min(1)]], // NEW CAPACITY FIELD
-      status: ['SCHEDULED'] 
+      maxCapacity: [100, [Validators.required, Validators.min(1)]],
+      status: ['SCHEDULED'],
+      assignedStaffUsername: [''] // NEW: Staff selection control
     });
+    
     this.getEvents();
+
+    // NEW: Fetch staff list to populate dropdown
+    this.httpService.getStaffList().subscribe((data: any[]) => {
+      this.staffList = data;
+    });
   }
 
   getEvents(): void {
@@ -64,11 +73,18 @@ export class CreateEventComponent implements OnInit {
 
   onSubmit(): void {
     if (this.itemForm.valid) {
-      this.httpService.createEvent(this.itemForm.value).subscribe(
+      
+      // Clone the form data so we can securely attach the permissions
+      const payload = { ...this.itemForm.value };
+      
+      // NEW: Stamp the event with the Planner who created it
+      payload.plannerUsername = localStorage.getItem('username') || 'Unknown Planner';
+
+      this.httpService.createEvent(payload).subscribe(
         (res) => {
           this.showMessage = true;
-          this.responseMessage = "Event successfully drafted!";
-          this.itemForm.reset({ status: 'SCHEDULED', maxCapacity: 100 });
+          this.responseMessage = "Event successfully drafted and assigned!";
+          this.itemForm.reset({ status: 'SCHEDULED', maxCapacity: 100, assignedStaffUsername: '' });
           this.getEvents();
           setTimeout(() => this.showMessage = false, 3000);
         },

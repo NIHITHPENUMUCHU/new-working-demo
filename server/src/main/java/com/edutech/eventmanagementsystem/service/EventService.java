@@ -17,19 +17,24 @@ public class EventService {
     @Autowired private NotificationRepository notificationRepository;
 
     public Event createEvent(Event event) {
-        // Safe check for capacity tracking
         if(event.getBookedCount() == null) event.setBookedCount(0);
+        if(event.getStatus() == null || event.getStatus().isEmpty()) event.setStatus("SCHEDULED");
+        
         Event savedEvent = eventRepository.save(event);
         
         try {
             String plannerName = SecurityContextHolder.getContext().getAuthentication().getName();
             Notification notif = new Notification();
             notif.setMessage("Planner '" + plannerName + "' drafted event: " + savedEvent.getTitle() + " (Capacity: " + savedEvent.getMaxCapacity() + ")");
-            notif.setTargetRole("STAFF");
+            
+            // TARGETED NOTIFICATION: Send to specific staff member if assigned, else broadcast to all staff
+            if (savedEvent.getAssignedStaffUsername() != null && !savedEvent.getAssignedStaffUsername().isEmpty()) {
+                notif.setTargetRole("STAFF_" + savedEvent.getAssignedStaffUsername());
+            } else {
+                notif.setTargetRole("STAFF");
+            }
             notificationRepository.save(notif);
-        } catch (Exception e) {
-            // Safely ignore if security context is not populated during testing
-        }
+        } catch (Exception e) {}
         
         return savedEvent;
     }
@@ -54,7 +59,6 @@ public class EventService {
         event.setLocation(eventDetails.getLocation());
         event.setStatus(eventDetails.getStatus());
         
-        // Staff updates the capacity
         if(eventDetails.getMaxCapacity() != null) {
             event.setMaxCapacity(eventDetails.getMaxCapacity());
         }
@@ -64,24 +68,28 @@ public class EventService {
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
             
-            // Trigger Notification to Planner if Staff updates Status OR Capacity
             boolean statusChanged = oldStatus != null && !oldStatus.equals(updatedEvent.getStatus());
             boolean capacityChanged = oldCapacity != null && !oldCapacity.equals(updatedEvent.getMaxCapacity());
 
             if (statusChanged || capacityChanged) {
                 Notification notif = new Notification();
-                // THE FIX: Using getEventID() to match the entity perfectly
-                String msg = "Staff '" + username + "' updated Event #" + updatedEvent.getEventID() + ". "; 
+                
+                // THE FIX: Changed getEventID() to getId()
+                String msg = "Staff '" + username + "' updated Event #" + updatedEvent.getId() + ". "; 
                 if(statusChanged) msg += "Status: " + updatedEvent.getStatus() + ". ";
                 if(capacityChanged) msg += "New Capacity: " + updatedEvent.getMaxCapacity() + " seats.";
                 
                 notif.setMessage(msg);
-                notif.setTargetRole("PLANNER");
+                
+                // TARGETED NOTIFICATION: Send alert ONLY to the Planner who created this event
+                if (updatedEvent.getPlannerUsername() != null && !updatedEvent.getPlannerUsername().isEmpty()) {
+                    notif.setTargetRole("PLANNER_" + updatedEvent.getPlannerUsername());
+                } else {
+                    notif.setTargetRole("PLANNER");
+                }
                 notificationRepository.save(notif);
             }
-        } catch (Exception e) {
-            // Safe fallback
-        }
+        } catch (Exception e) {}
         
         return updatedEvent;
     }

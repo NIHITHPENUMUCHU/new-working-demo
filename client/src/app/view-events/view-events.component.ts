@@ -18,41 +18,61 @@ export class ViewEventsComponent implements OnInit {
   
   isUpdate: boolean = false;
   eventObj: any = null;
+  username: string = '';
 
   constructor(public router: Router, public httpService: HttpService, private formBuilder: FormBuilder) { }
 
   ngOnInit(): void {
+    this.username = localStorage.getItem('username') || 'unknown';
+    
     this.itemForm = this.formBuilder.group({
       title: ['', Validators.required],
       description: ['', Validators.required],
       dateTime: ['', Validators.required],
       location: ['', Validators.required],
-      maxCapacity: ['', [Validators.required, Validators.min(1)]], // NEW FIELD
+      maxCapacity: ['', [Validators.required, Validators.min(1)]], 
       status: ['', Validators.required]
     });
   }
 
+  // NEW SECURE SEARCH ENGINE
   searchEvent(): void {
     if (this.formModel.eventID != null) {
-      this.httpService.getEventDetails(this.formModel.eventID).subscribe(
-        (data: any) => {
-          if (data) {
-            this.eventObj = data;
+      
+      // 1. Fetch the list of events this specific staff member is allowed to see
+      this.httpService.getStaffEvents(this.username).subscribe(
+        (authorizedEvents: any[]) => {
+          
+          // 2. Check if the ID they searched for is in their authorized list
+          const foundEvent = authorizedEvents.find(e => 
+            e.eventID == this.formModel.eventID || e.id == this.formModel.eventID
+          );
+
+          if (foundEvent) {
+            // Authorized! Load the form.
+            this.eventObj = foundEvent;
             this.isUpdate = true;
             this.showError = false;
             this.itemForm.patchValue({
-              title: data.title, 
-              description: data.description, 
-              dateTime: data.dateTime, 
-              location: data.location, 
-              maxCapacity: data.maxCapacity, // Populates existing capacity
-              status: data.status
+              title: foundEvent.title, 
+              description: foundEvent.description, 
+              dateTime: foundEvent.dateTime, 
+              location: foundEvent.location, 
+              maxCapacity: foundEvent.maxCapacity, 
+              status: foundEvent.status
             });
           } else {
-            this.showError = true; this.errorMessage = "No event found with that ID."; this.isUpdate = false;
+            // Denied! The event exists but belongs to a different staff member (or doesn't exist at all).
+            this.showError = true; 
+            this.errorMessage = "Access Denied: Event not found or assigned to another staff member."; 
+            this.isUpdate = false;
           }
         },
-        (error: any) => { this.showError = true; this.errorMessage = "Failed to locate event."; this.isUpdate = false; }
+        (error: any) => { 
+          this.showError = true; 
+          this.errorMessage = "Failed to communicate with authorization server."; 
+          this.isUpdate = false; 
+        }
       );
     }
   }
@@ -62,7 +82,10 @@ export class ViewEventsComponent implements OnInit {
       this.httpService.updateEvent(this.eventObj.eventID || this.eventObj.id, this.itemForm.value).subscribe(
         (res: any) => {
           this.showMessage = true; this.responseMessage = "Operations successfully updated!"; this.showError = false;
+          
+          // Re-fetch to ensure the view stays perfectly in sync
           this.searchEvent();
+          
           setTimeout(() => { this.showMessage = false; }, 3000);
         },
         (error: any) => { this.showError = true; this.errorMessage = "Failed to update operations."; }
