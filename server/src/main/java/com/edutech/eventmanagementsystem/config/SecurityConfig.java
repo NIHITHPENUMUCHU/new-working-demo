@@ -44,10 +44,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
-    // =========================================================
-    // CRITICAL FIX: The CORS Filter Bean
-    // This explicitly tells Spring Boot to allow requests from your Angular frontend
-    // =========================================================
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

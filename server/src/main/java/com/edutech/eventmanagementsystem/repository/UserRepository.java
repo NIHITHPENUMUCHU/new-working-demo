@@ -8,10 +8,8 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    
-    // Finds a user by their username (Used for Login & Duplicate Checks)
     Optional<User> findByUsername(String username);
     
-    // Finds a user by their email (Used for Duplicate Checks)
+    // NEW: Find by email for Forgot Password functionality
     Optional<User> findByEmail(String email);
 }
