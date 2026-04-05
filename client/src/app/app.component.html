@@ -1,11 +1,12 @@
 <header class="global-header">
   
-  <div class="brand-logo" [routerLink]="IsLoggin ? '/dashboard' : '/login'">
+  <div class="brand-logo" [routerLink]="IsLoggin ? '/dashboard' : '/'">
     <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="var(--c-teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polygon points="12 2 2 22 12 17 22 22 12 2"></polygon>
     </svg>
     <span class="brand-text">EventMaster</span><span class="brand-dot">.</span>
   </div>
+
   
   <ng-container *ngIf="IsLoggin">
     <nav class="main-nav">
@@ -42,10 +43,11 @@
             <span>System Alerts</span>
             <button class="btn-read-all" *ngIf="unreadCount > 0" (click)="markAllAsRead($event)">Mark All as Read</button>
           </div>
+          
           <div class="dropdown-body">
             <div *ngIf="notifications.length === 0" class="empty-state">No active signals.</div>
             
-            <div class="dropdown-item" *ngFor="let notif of notifications | slice:0:8" 
+            <div class="dropdown-item" *ngFor="let notif of paginatedNotifications" 
                  [class.is-read]="notif.isRead" 
                  (click)="markAsRead(notif, $event)">
               
@@ -56,6 +58,18 @@
                 <small>{{ notif.timestamp | date:'MMM d, y, h:mm a' }}</small>
               </div>
             </div>
+          </div>
+
+          <div class="notif-pagination" *ngIf="notifications.length > notifItemsPerPage">
+            <button class="btn-page" (click)="prevNotifPage($event)" [disabled]="notifCurrentPage === 1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            
+            <span class="page-info">Page {{ notifCurrentPage }} of {{ notifTotalPages }}</span>
+            
+            <button class="btn-page" (click)="nextNotifPage($event)" [disabled]="notifCurrentPage === notifTotalPages">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
           </div>
         </div>
       </div>

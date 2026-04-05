@@ -4,7 +4,11 @@
     <div class="hero-content">
       <div class="role-badge">{{ roleName }}</div>
       
-      <h1>Welcome to your Workspace, <span class="highlight-name">{{ username }}</span></h1>
+      <h1>
+        <ng-container *ngIf="roleName !== 'CLIENT'">Welcome to your Workspace, </ng-container>
+        <ng-container *ngIf="roleName === 'CLIENT'">Welcome, </ng-container>
+        <span class="highlight-name">{{ username }}</span>
+      </h1>
       
       <div class="system-status-bar">
         

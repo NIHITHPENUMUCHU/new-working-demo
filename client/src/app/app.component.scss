@@ -305,3 +305,53 @@
   } 
 }
 @keyframes dropDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* --- NOTIFICATION PAGINATION --- */
+.notif-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+
+  .page-info {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .btn-page {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+
+    svg { 
+      width: 16px; 
+      height: 16px; 
+      color: var(--c-navy); 
+      transition: transform 0.2s;
+    }
+
+    &:hover:not(:disabled) {
+      background: var(--c-teal);
+      border-color: var(--c-teal);
+      svg { color: #ffffff; }
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #f1f5f9;
+    }
+  }
+}

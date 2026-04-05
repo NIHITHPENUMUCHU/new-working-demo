@@ -1,0 +1,268 @@
+<div class="landing-page-container">
+
+    <nav class="landing-nav animate-fade-in">
+        <div class="nav-logo" (click)="scrollToTop()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--c-teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 2 22 12 17 22 22 12 2"></polygon>
+            </svg>
+            <span class="logo-text">EventMaster<span class="dot">.</span></span>
+        </div>
+
+        <div class="nav-center-links">
+            <a href="#platform" class="nav-link">Architecture</a>
+            <a href="#features" class="nav-link">Core Features</a>
+            <a href="#roles" class="nav-link">Workspaces</a>
+        </div>
+
+        <div class="nav-auth-links">
+            <a routerLink="/login" class="btn-login">System Login</a>
+            <a routerLink="/registration" class="btn-register">Initialize Access</a>
+        </div>
+    </nav>
+
+    <header class="futuristic-hero">
+        
+        <div class="hero-bg-effects">
+            <div class="cyber-grid"></div>
+            <div class="glow-orb orb-teal"></div>
+            <div class="glow-orb orb-orange"></div>
+        </div>
+
+        <div class="hero-split-layout">
+            <div class="hero-text-column">
+                
+                <h1 class="anim-1">
+                    Command Your Events With <br>
+                    <span class="gradient-accent">Absolute Precision.</span>
+                </h1>
+                
+                <p class="anim-2">
+                    The enterprise ecosystem engineered for Planners, Staff, and Attendees. Real-time capacity mapping, dynamic resource routing, and live operational syncing.
+                </p>
+                
+                <div class="action-group anim-3">
+                    <a routerLink="/registration" class="btn-cyber-primary">Enter Command Center</a>
+                    <a href="#platform" class="btn-cyber-secondary">
+                        View Schematics
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div class="hero-visual-column anim-4">
+                <div class="hologram-radar">
+                    
+                    <div class="radar-circle circle-1"></div>
+                    <div class="radar-circle circle-2"></div>
+                    <div class="radar-circle circle-3"></div>
+                    <div class="radar-scanner"></div>
+
+                    <div class="orbit-path path-1">
+                        <div class="data-node node-teal">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                        </div>
+                    </div>
+                    <div class="orbit-path path-2">
+                        <div class="data-node node-orange">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg>
+                        </div>
+                    </div>
+
+                    <div class="radar-core pulse-teal-core">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 2 22 12 17 22 22 12 2"></polygon>
+                        </svg>
+                    </div>
+
+                    <div class="cyber-glass-panel panel-left float-medium">
+                        <div class="panel-header">
+                            <span class="live-dot"></span>
+                            CAPACITY: MAIN STAGE
+                        </div>
+                        <div class="capacity-bar-track">
+                            <div class="capacity-fill teal-fill"></div>
+                        </div>
+                        <div class="panel-footer">85% ALLOCATED</div>
+                    </div>
+
+                    <div class="cyber-glass-panel panel-right float-slow">
+                        <div class="panel-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="var(--c-orange)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            SYNC STATUS
+                        </div>
+                        <div class="sync-lines">
+                            <div class="sync-line"></div>
+                            <div class="sync-line short"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="architecture-section" id="platform">
+        <div class="section-title text-center">
+            <h2>Tripartite System Architecture</h2>
+            <p>How our three isolated workspaces communicate seamlessly through the backend.</p>
+        </div>
+        
+        <div class="arch-flowchart">
+            <div class="arch-node planner-node">
+                <div class="node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg></div>
+                <h4>The Planner</h4>
+                <p>Drafts events & sets capacity limits.</p>
+            </div>
+            
+            <div class="arch-connection">
+                <div class="flow-line animated-flow"></div>
+                <span>Allocates Inventory</span>
+            </div>
+
+            <div class="arch-node staff-node">
+                <div class="node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg></div>
+                <h4>The Staff</h4>
+                <p>Receives directives & executes setup.</p>
+            </div>
+
+            <div class="arch-connection">
+                <div class="flow-line animated-flow reverse"></div>
+                <span>Status Synced</span>
+            </div>
+
+            <div class="arch-node client-node">
+                <div class="node-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+                <h4>The Client</h4>
+                <p>Books tickets & retrieves passes.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-showcase" id="features">
+        
+        <div class="showcase-row">
+            <div class="text-content">
+                <div class="tag teal-tag">Live Ticketing Hub</div>
+                <h2>The Live Capacity Engine</h2>
+                <p>Never overbook an event again. Our backend algorithm tracks every digital pass secured by clients. As the bookings approach maximum capacity, the planner's dashboard updates live.</p>
+                <ul class="feature-list">
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>Real-Time Progress:</strong> Visual CSS capacity bars.</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>Auto-Lockout:</strong> Client booking is disabled instantly upon sell-out.</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>Zero Refresh Required:</strong> Built with Angular reactive services.</li>
+                </ul>
+            </div>
+            <div class="visual-content">
+                <div class="image-wrapper shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80" alt="Concert Crowd">
+                    <div class="overlay-ui bottom-right">
+                        <span class="red-dot"></span> SOLD OUT
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="showcase-row reverse">
+            <div class="visual-content">
+                <div class="image-wrapper shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80" alt="Digital Ticket">
+                    <div class="overlay-ui top-left brand-ui">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> 
+                        Ticket.pdf Saved
+                    </div>
+                </div>
+            </div>
+            <div class="text-content">
+                <div class="tag orange-tag">Client Digital Wallet</div>
+                <h2>Native High-Res PDF Rendering</h2>
+                <p>Attendees don't just click a button; they receive a tangible digital asset. Clients can browse events, secure their spot, and access their dedicated Digital Wallet to manage entry passes.</p>
+                <ul class="feature-list">
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>Dynamic QR Codes:</strong> Auto-generated for security.</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>Smart Expiration:</strong> Past tickets automatically turn grayscale.</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>Physical Print Ready:</strong> High-resolution export functionality.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="showcase-row">
+            <div class="text-content">
+                <div class="tag navy-tag">Inventory Engine</div>
+                <h2>Mathematical Resource Allocation</h2>
+                <p>Bridge the gap between vision and execution. Register physical global resources (Chairs, AV Tech, Stages). When a Planner allocates items to an event, the system mathematically deducts from the global stock.</p>
+                <ul class="feature-list">
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>Automated Stock Depletion:</strong> Prevents double-booking hardware.</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>Availability Toggles:</strong> Items hit 'false' when stock reaches zero.</li>
+                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>Staff Execution:</strong> Ground teams see exactly what to build.</li>
+                </ul>
+            </div>
+            <div class="visual-content">
+                <div class="image-wrapper shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1200&q=80" alt="Event Setup">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="workflow-section" id="roles">
+        <div class="section-heading text-center">
+            <h2>Conflict-Free Workspaces.</h2>
+            <p>Our routing architecture guarantees users only see the tools they are authorized to use.</p>
+        </div>
+
+        <div class="workflow-grid">
+            <div class="workflow-card">
+                <div class="role-icon planner-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line></svg></div>
+                <h3>The Planner</h3>
+                <p>Complete access to event drafting, inventory registration, mathematical allocation, and the live ticketing hub.</p>
+            </div>
+            <div class="workflow-card">
+                <div class="role-icon staff-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg></div>
+                <h3>Operations Staff</h3>
+                <p>A streamlined dashboard dedicated purely to reviewing venue blueprints and updating live operational statuses.</p>
+            </div>
+            <div class="workflow-card">
+                <div class="role-icon client-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+                <h3>The Valued Client</h3>
+                <p>A secure, read-only portal to discover scheduled events, process bookings, and generate digital entry passes.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="bottom-cta">
+        <div class="cta-bg-glow"></div>
+        <div class="cta-content">
+            <h2>Ready to Master Your Next Event?</h2>
+            <p>Deploy the enterprise platform that handles the heavy mathematical lifting.</p>
+            <div class="cta-buttons">
+                <a routerLink="/registration" class="btn-primary">Initialize Access</a>
+                <a routerLink="/login" class="btn-secondary">System Login</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="landing-footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <div class="nav-logo" (click)="scrollToTop()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="var(--c-teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 22 12 17 22 22 12 2"></polygon></svg>
+                    <span class="logo-text">EventMaster<span class="dot">.</span></span>
+                </div>
+                <p>Enterprise Event Architecture.</p>
+            </div>
+            <div class="footer-right">
+                <a routerLink="/login">Planner Login</a>
+                <a routerLink="/login">Staff Portal</a>
+                <a routerLink="/registration">Client Access</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 EventMaster Pro. Angular + Spring Boot Capstone Project.</p>
+        </div>
+    </footer>
+
+    <button class="back-to-top" [class.show]="showBackToTop" (click)="scrollToTop()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+    </button>
+
+</div>

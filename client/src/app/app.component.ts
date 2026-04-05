@@ -11,11 +11,17 @@ import { HttpService } from '../services/http.service';
 export class AppComponent implements OnInit, OnDestroy {
   showLogoutModal: boolean = false;
   
-  // Notification Variables
+  // --- Notification Engine Variables ---
   notifications: any[] = [];
   showNotifications: boolean = false;
   unreadCount: number = 0;
   pollingInterval: any;
+
+  // --- NEW: Notification Pagination Variables ---
+  paginatedNotifications: any[] = [];
+  notifCurrentPage: number = 1;
+  notifItemsPerPage: number = 5; 
+  notifTotalPages: number = 0;
 
   constructor(
     private authService: AuthService, 
@@ -24,7 +30,6 @@ export class AppComponent implements OnInit, OnDestroy {
     private eRef: ElementRef
   ) {}
 
-  // Closes the notification dropdown if you click anywhere else on the screen
   @HostListener('document:click', ['$event'])
   clickout(event: any) {
     if (this.showNotifications) {
@@ -49,11 +54,41 @@ export class AppComponent implements OnInit, OnDestroy {
       const rolePath = this.roleName.toLowerCase();
       this.httpService.getNotifications(rolePath).subscribe(data => {
          this.notifications = data;
-         this.unreadCount = this.notifications.filter(n => !n.isRead).length;
+         this.unreadCount = this.notifications.filter((n: any) => !n.isRead).length;
+         this.updateNotificationPagination(); // Apply pagination math
       });
     }
   }
 
+  // --- NEW: Pagination Logic ---
+  updateNotificationPagination() {
+    this.notifTotalPages = Math.ceil(this.notifications.length / this.notifItemsPerPage);
+    if (this.notifTotalPages > 0 && this.notifCurrentPage > this.notifTotalPages) {
+      this.notifCurrentPage = this.notifTotalPages;
+    }
+    if (this.notifCurrentPage < 1) this.notifCurrentPage = 1;
+
+    const start = (this.notifCurrentPage - 1) * this.notifItemsPerPage;
+    this.paginatedNotifications = this.notifications.slice(start, start + this.notifItemsPerPage);
+  }
+
+  nextNotifPage(event: Event) {
+    event.stopPropagation(); // Prevents dropdown from closing
+    if (this.notifCurrentPage < this.notifTotalPages) {
+      this.notifCurrentPage++;
+      this.updateNotificationPagination();
+    }
+  }
+
+  prevNotifPage(event: Event) {
+    event.stopPropagation(); // Prevents dropdown from closing
+    if (this.notifCurrentPage > 1) {
+      this.notifCurrentPage--;
+      this.updateNotificationPagination();
+    }
+  }
+
+  // --- Mark as Read Logic ---
   markAsRead(notif: any, event: Event) {
     event.stopPropagation(); 
     if (notif.isRead) return; 
@@ -61,7 +96,7 @@ export class AppComponent implements OnInit, OnDestroy {
     const rolePath = this.roleName!.toLowerCase();
     this.httpService.markNotificationRead(rolePath, notif.id).subscribe(() => {
       notif.isRead = true; 
-      this.unreadCount = this.notifications.filter(n => !n.isRead).length; 
+      this.unreadCount = this.notifications.filter((n: any) => !n.isRead).length; 
     });
   }
 
@@ -69,7 +104,7 @@ export class AppComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     const rolePath = this.roleName!.toLowerCase();
     this.httpService.markAllNotificationsRead(rolePath).subscribe(() => {
-      this.notifications.forEach(n => n.isRead = true);
+      this.notifications.forEach((n: any) => n.isRead = true);
       this.unreadCount = 0;
     });
   }
