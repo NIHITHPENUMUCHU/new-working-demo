@@ -32,7 +32,7 @@ public class UserService implements UserDetailsService {
             throw new RuntimeException("An account with this email already exists");
         }
 
-        // Encrypt password and save user (Security questions are saved automatically)
+        // Encrypt password and save user (Security questions map automatically)
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }

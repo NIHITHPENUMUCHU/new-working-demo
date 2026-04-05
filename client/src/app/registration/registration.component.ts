@@ -19,9 +19,13 @@ export class RegistrationComponent implements OnInit, OnDestroy {
   roleSubscription!: Subscription;
 
   // --- ENTERPRISE SECURITY CODES ---
-  // You can change these to whatever you want your secret passcodes to be!
   readonly PLANNER_CODE = 'PLANNER-ADMIN-2026';
   readonly STAFF_CODE = 'STAFF-OPERATIONS-2026';
+
+  // --- SECURITY QUESTIONS ---
+  q1List = ['What is your favorite color?', 'What was your childhood nickname?', 'What is the name of your favorite pet?'];
+  q2List = ['In what city were you born?', 'What was your first car?', 'What is your favorite food?'];
+  q3List = ['What high school did you attend?', 'What is your favorite movie?', 'Who was your childhood hero?'];
 
   constructor(
     private formBuilder: FormBuilder,
@@ -37,27 +41,45 @@ export class RegistrationComponent implements OnInit, OnDestroy {
       email: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,30}$/)]],
       password: ['', [Validators.required, Validators.pattern(passwordRegex)]],
       role: ['', Validators.required],
-      authCode: [''] // New hidden field for the secret passcode
+      authCode: [''], // Hidden field for the secret passcode
+
+      // Security Verification Fields
+      securityQuestion1: [''],
+      securityAnswer1: [''],
+      securityQuestion2: [''],
+      securityAnswer2: [''],
+      securityQuestion3: [''],
+      securityAnswer3: ['']
     });
 
-    // Listen to the dropdown menu to trigger the security code requirement
+    // Listen to the dropdown menu to trigger the security code & questions requirement
     this.roleSubscription = this.itemForm.get('role')!.valueChanges.subscribe(role => {
       const authControl = this.itemForm.get('authCode');
+      const securityControls = [
+        'securityQuestion1', 'securityAnswer1',
+        'securityQuestion2', 'securityAnswer2',
+        'securityQuestion3', 'securityAnswer3'
+      ];
       
       if (role === 'PLANNER') {
-        // Enforce the Planner Code
         authControl?.setValidators([Validators.required, Validators.pattern(`^${this.PLANNER_CODE}$`)]);
+        securityControls.forEach(ctrl => this.itemForm.get(ctrl)?.setValidators([Validators.required]));
       } else if (role === 'STAFF') {
-        // Enforce the Staff Code
         authControl?.setValidators([Validators.required, Validators.pattern(`^${this.STAFF_CODE}$`)]);
+        securityControls.forEach(ctrl => this.itemForm.get(ctrl)?.setValidators([Validators.required]));
       } else {
-        // Client selected - remove all passcode requirements
+        // Client selected - remove all passcode & security question requirements
         authControl?.clearValidators();
+        securityControls.forEach(ctrl => this.itemForm.get(ctrl)?.clearValidators());
       }
       
-      // Reset the input box and update the form's validity state
+      // Reset the inputs and update the form's validity state
       authControl?.setValue(''); 
       authControl?.updateValueAndValidity();
+      securityControls.forEach(ctrl => {
+        this.itemForm.get(ctrl)?.setValue('');
+        this.itemForm.get(ctrl)?.updateValueAndValidity();
+      });
     });
   }
 
@@ -70,8 +92,7 @@ export class RegistrationComponent implements OnInit, OnDestroy {
   onSubmit(): void {
     if (this.itemForm.valid) {
       
-      // Security trick: We extract the authCode out of the data so we only send 
-      // the core user details to the Java backend. Otherwise, Java throws an error!
+      // Security trick: Extract the authCode so we only send core details to backend
       const { authCode, ...secureUserData } = this.itemForm.value;
 
       this.httpService.registerUser(secureUserData).subscribe(

@@ -27,12 +27,13 @@ export class HttpService {
     return this.http.post(`${this.serverName}/api/user/register`, details);
   }
   
-  generateOtp(payload: any): Observable<any> {
-    return this.http.post(this.serverName + '/api/user/generate-otp', payload);
+  // --- NEW: Security Verification Endpoints ---
+  getSecurityQuestions(payload: any): Observable<any> {
+    return this.http.post(`${this.serverName}/api/user/forgot-password/questions`, payload);
   }
 
-  resetWithOtp(payload: any): Observable<any> {
-    return this.http.post(this.serverName + '/api/user/reset-with-otp', payload);
+  resetPassword(payload: any): Observable<any> {
+    return this.http.post(`${this.serverName}/api/user/forgot-password/reset`, payload);
   }
 
   // --- PLANNER ENDPOINTS ---

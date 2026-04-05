@@ -62,19 +62,63 @@
         <div class="form-group" *ngIf="itemForm.get('role')?.value === 'PLANNER' || itemForm.get('role')?.value === 'STAFF'">
           <label>Authorization Passcode</label>
           <div class="input-wrapper">
-            
             <svg class="input-icon auth-shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
               <path d="M10 12v-2a2 2 0 1 1 4 0v2"></path>
               <rect x="9" y="12" width="6" height="5" rx="1"></rect>
             </svg>
-
             <input type="password" formControlName="authCode" placeholder="Enter administrative passcode">
           </div>
           
           <div *ngIf="itemForm.get('authCode')?.touched && itemForm.get('authCode')?.invalid" class="validation-error">
             <span *ngIf="itemForm.get('authCode')?.errors?.['required']">A security passcode is required for this role.</span>
             <span *ngIf="itemForm.get('authCode')?.errors?.['pattern']">Invalid passcode. Access Denied.</span>
+          </div>
+        </div>
+
+        <div *ngIf="itemForm.get('role')?.value === 'PLANNER' || itemForm.get('role')?.value === 'STAFF'">
+          
+          <div style="margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+            <h4 style="color: var(--c-teal); font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 0;">Account Recovery Setup</h4>
+          </div>
+
+          <div class="form-group">
+            <label>Security Question 1</label>
+            <div class="input-wrapper" style="margin-bottom: 10px;">
+              <select formControlName="securityQuestion1">
+                <option value="" disabled selected>-- Select Question 1 --</option>
+                <option *ngFor="let q of q1List" [value]="q">{{ q }}</option>
+              </select>
+            </div>
+            <div class="input-wrapper">
+              <input type="text" formControlName="securityAnswer1" placeholder="Your Answer">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Security Question 2</label>
+            <div class="input-wrapper" style="margin-bottom: 10px;">
+              <select formControlName="securityQuestion2">
+                <option value="" disabled selected>-- Select Question 2 --</option>
+                <option *ngFor="let q of q2List" [value]="q">{{ q }}</option>
+              </select>
+            </div>
+            <div class="input-wrapper">
+              <input type="text" formControlName="securityAnswer2" placeholder="Your Answer">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Security Question 3</label>
+            <div class="input-wrapper" style="margin-bottom: 10px;">
+              <select formControlName="securityQuestion3">
+                <option value="" disabled selected>-- Select Question 3 --</option>
+                <option *ngFor="let q of q3List" [value]="q">{{ q }}</option>
+              </select>
+            </div>
+            <div class="input-wrapper">
+              <input type="text" formControlName="securityAnswer3" placeholder="Your Answer">
+            </div>
           </div>
         </div>
 
