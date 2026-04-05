@@ -13,9 +13,11 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
   availableEvents: any[] = [];
   myTickets: any[] = [];
   username: string = '';
+  
+  // Tracks which specific ticket to isolate for the PDF
   printingTicketId: any = null;
+  isPrinting: boolean = false;
 
-  // Background Sync Tracker
   private pollingInterval: any; 
 
   constructor(public router: Router, public httpService: HttpService) { }
@@ -25,8 +27,6 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
     this.fetchActiveEvents();
     this.loadMyTickets();
 
-    // CRITICAL FIX: Background Sync Engine
-    // Fetches fresh data every 5 seconds without interrupting the user
     this.pollingInterval = setInterval(() => {
       if (this.activeTab === 'CATALOG') {
         this.fetchActiveEvents();
@@ -36,11 +36,8 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
     }, 5000); 
   }
 
-  // Prevents memory leaks when navigating away
   ngOnDestroy(): void {
-    if (this.pollingInterval) {
-      clearInterval(this.pollingInterval);
-    }
+    if (this.pollingInterval) clearInterval(this.pollingInterval);
   }
 
   fetchActiveEvents(): void {
@@ -80,10 +77,7 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
             localStorage.setItem('myTickets_' + this.username, JSON.stringify(this.myTickets));
           }
         },
-        (error) => {
-          console.error("Background sync failed for ticket ID:", eventId, error);
-          checksCompleted++;
-        }
+        (error) => { checksCompleted++; }
       );
     });
   }
@@ -109,10 +103,14 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
   }
 
   printTicket(ticket: any): void {
+    this.isPrinting = true;
     this.printingTicketId = ticket.uniqueTicketId || ticket.eventID || ticket.id;
+    
+    // Give Angular time to apply the .print-target class before opening the dialog
     setTimeout(() => {
       window.print();
       this.printingTicketId = null;
-    }, 150);
+      this.isPrinting = false; 
+    }, 1200); 
   }
 }

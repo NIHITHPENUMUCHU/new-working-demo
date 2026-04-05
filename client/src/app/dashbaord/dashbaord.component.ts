@@ -19,10 +19,25 @@ export class DashbaordComponent implements OnInit, OnDestroy {
   availableResources: number = 0; totalResources: number = 0; totalAllocations: number = 0;
 
   showFAQ: boolean = false; activeFaqIndex: number | null = null;
+  
+  // UPDATED FAQs FOR NEW FEATURES
   faqs = [
-    { question: 'How do I use this dashboard?', answer: 'Click "Retrieve Booking" to search for your event.' },
-    { question: 'Can I purchase tickets directly here?', answer: 'EventMaster Pro operates as a B2B management system.' },
-    { question: 'What does "Ongoing" status mean?', answer: 'Staff has actively set up the venue and operations are live!' }
+    { 
+      question: 'How do I secure an entry pass?', 
+      answer: 'Click "Open Client Portal" to browse the active event catalog. If an event has available capacity, you can secure your digital pass instantly.' 
+    },
+    { 
+      question: 'How do I download my ticket as a PDF?', 
+      answer: 'Inside the portal, navigate to the "My Digital Passes" tab. Click the "Save as PDF" button on any active pass to generate a high-resolution, printable ticket.' 
+    },
+    { 
+      question: 'What happens if an event is sold out?', 
+      answer: 'Our live capacity engine automatically locks bookings the moment maximum capacity is reached. You will see a "SOLD OUT" stamp on the event card.' 
+    },
+    { 
+      question: 'What do the different event statuses mean?', 
+      answer: '"Scheduled" means the event is upcoming. "Ongoing" means operations are live and you can enter the venue. "Completed" means the event has ended and your pass QR code is expired.' 
+    }
   ];
 
   // Background Sync Tracker
@@ -62,7 +77,7 @@ export class DashbaordComponent implements OnInit, OnDestroy {
     if (this.roleName === 'PLANNER') {
       this.fetchLiveMetrics();
       
-      // CRITICAL FIX: Live Dashboard Auto-Refresh
+      // Live Dashboard Auto-Refresh
       this.pollingInterval = setInterval(() => {
         this.fetchLiveMetrics();
       }, 5000);
