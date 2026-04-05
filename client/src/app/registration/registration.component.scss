@@ -1,4 +1,5 @@
 :host {
+  /* Strict Palette Definitions */
   --c-navy: #0F172A;
   --c-teal: #0D9488;
   --c-orange: #EA580C;
@@ -36,7 +37,10 @@
   background: #ffffff; 
   display: flex; 
   flex-direction: column; 
-  justify-content: center; 
+  
+  /* THE FIX: Changed from 'center' to 'flex-start' to fix the scrolling issue */
+  justify-content: flex-start; 
+  
   overflow-y: auto; 
 }
 
