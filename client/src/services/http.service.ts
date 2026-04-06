@@ -56,6 +56,11 @@ export class HttpService {
   allocateResources(eventId: any, resourceId: any, details: any): Observable<any> {
     return this.http.post(`${this.serverName}/api/planner/allocate-resource/${eventId}/${resourceId}`, details, { headers: this.getHeaders() });
   }
+
+  // --- UPGRADE 1: BULK MANIFEST BUILDER ---
+  allocateResourcesBulk(eventId: number, allocations: any[]): Observable<any> {
+    return this.http.post(`${this.serverName}/api/planner/allocate-resources/bulk/${eventId}`, allocations, { headers: this.getHeaders() });
+  }
   
   getAllAllocations(): Observable<any> {
     return this.http.get(`${this.serverName}/api/planner/allocations`, { headers: this.getHeaders() });

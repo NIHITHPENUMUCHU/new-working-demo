@@ -27,7 +27,6 @@
   <div class="content-grid">
     <div class="enterprise-card form-card">
       <h3>Draft New Event</h3>
-      
       <div *ngIf="showMessage" class="alert alert-success">{{ responseMessage }}</div>
       <div *ngIf="showError" class="alert alert-danger">{{ errorMessage }}</div>
 
@@ -35,78 +34,56 @@
         <div class="form-group">
           <label>Event Title</label>
           <input type="text" formControlName="title" placeholder="e.g., Annual Tech Summit">
-          <span class="validation-error" *ngIf="itemForm.get('title')?.touched && itemForm.get('title')?.invalid">Required</span>
         </div>
-
         <div class="form-group">
           <label>Description</label>
-          <textarea formControlName="description" rows="3" placeholder="Event details and objectives..."></textarea>
-          <span class="validation-error" *ngIf="itemForm.get('description')?.touched && itemForm.get('description')?.invalid">Required</span>
+          <textarea formControlName="description" rows="3"></textarea>
         </div>
-
         <div class="form-group">
           <label>Event Date & Time</label>
           <input type="date" formControlName="dateTime">
-          <span class="validation-error" *ngIf="itemForm.get('dateTime')?.touched && itemForm.get('dateTime')?.invalid">Required</span>
         </div>
-
         <div class="form-group">
           <label>Location / Sector</label>
           <input type="text" formControlName="location" placeholder="e.g., Main Hall A">
-          <span class="validation-error" *ngIf="itemForm.get('location')?.touched && itemForm.get('location')?.invalid">Required</span>
         </div>
-
         <div class="form-group">
           <label>Assign Operations Staff</label>
           <select formControlName="assignedStaffUsername" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; font-family: 'Inter', sans-serif;">
             <option value="">Public - Any Available Staff</option>
-            <option *ngFor="let staff of staffList" [value]="staff.username">
-              {{ staff.username | titlecase }} ({{ staff.email }})
-            </option>
+            <option *ngFor="let staff of staffList" [value]="staff.username">{{ staff.username | titlecase }}</option>
           </select>
-          <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 4px;">Restrict operational access to a specific staff member.</small>
         </div>
-
         <div class="form-group">
           <label>Maximum Attendee Capacity</label>
           <input type="number" formControlName="maxCapacity" placeholder="e.g., 100" min="1">
-          <span class="validation-error" *ngIf="itemForm.get('maxCapacity')?.touched && itemForm.get('maxCapacity')?.invalid">Must be at least 1.</span>
         </div>
-
         <button type="submit" class="btn-primary" [disabled]="!itemForm.valid">Initialize Event</button>
       </form>
     </div>
 
     <div class="enterprise-card table-card">
-      <h3>Global Event Database</h3>
+      <div class="table-header-flex" style="padding: 25px 25px 0 25px;">
+        <h3>Global Event Database</h3>
+        <div class="global-search-wrapper" style="margin-bottom: 0;">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="filterEvents()" placeholder="Search by Title, Location, Staff...">
+        </div>
+      </div>
+      
       <div class="table-responsive">
         <table class="data-table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Event Title</th>
-              <th>Date</th>
-              <th>Assigned Staff</th>
-              <th style="width: 160px;">Capacity Filled</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th>ID</th><th>Event Title</th><th>Date</th><th>Assigned Staff</th><th style="width: 160px;">Capacity Filled</th><th>Status</th><th>Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let event of paginatedEventList">
-              <td class="id-col">#{{ event.eventID || event.id || '...' }}</td>
-              <td class="fw-bold">{{ event.title || event.name }}</td>
-              <td>
-                <span *ngIf="event.dateTime || event.datetime || event.eventDate">
-                  {{ (event.dateTime || event.datetime || event.eventDate) | date:'mediumDate' }}
-                </span>
-                <span *ngIf="!(event.dateTime || event.datetime || event.eventDate)" style="color: #94a3b8; font-style: italic;">Not Set</span>
-              </td>
-              
-              <td style="color: #EA580C; font-weight: 600;">
-                {{ event.assignedStaffUsername ? (event.assignedStaffUsername | titlecase) : 'Any Staff' }}
-              </td>
-
+              <td class="id-col">#{{ event.eventID || event.id }}</td>
+              <td class="fw-bold">{{ event.title }}</td>
+              <td><span *ngIf="event.dateTime">{{ event.dateTime | date:'mediumDate' }}</span></td>
+              <td style="color: #EA580C; font-weight: 600;">{{ event.assignedStaffUsername ? (event.assignedStaffUsername | titlecase) : 'Any Staff' }}</td>
               <td>
                 <div class="mini-progress-wrapper" title="{{ event.bookedCount || 0 }} / {{ event.maxCapacity || 1 }} Seats">
                   <div class="mini-stats">
@@ -114,46 +91,26 @@
                     <strong>{{ event.maxCapacity ? (((event.bookedCount || 0) / event.maxCapacity) * 100 | number:'1.0-0') : 0 }}%</strong>
                   </div>
                   <div class="mini-progress-bg">
-                    <div class="mini-progress-fill" 
-                         [style.width.%]="event.maxCapacity ? (((event.bookedCount || 0) / event.maxCapacity) * 100) : 0"
-                         [ngStyle]="{'background': (event.bookedCount || 0) >= (event.maxCapacity || 1) ? 'var(--c-orange)' : 'var(--c-teal)'}">
-                    </div>
+                    <div class="mini-progress-fill" [style.width.%]="event.maxCapacity ? (((event.bookedCount || 0) / event.maxCapacity) * 100) : 0" [ngStyle]="{'background': (event.bookedCount || 0) >= (event.maxCapacity || 1) ? 'var(--c-orange)' : 'var(--c-teal)'}"></div>
                   </div>
                 </div>
               </td>
-              
               <td><span class="status-badge" [ngClass]="event.status?.toLowerCase()">{{ event.status }}</span></td>
-
               <td>
-                <button *ngIf="event.status !== 'COMPLETED' && event.status !== 'CANCELLED'" 
-                        class="btn-cancel-small" 
-                        (click)="openCancelModal(event.eventID || event.id)">
-                  Abort Event
-                </button>
-                <span *ngIf="event.status === 'COMPLETED' || event.status === 'CANCELLED'" style="color: #94a3b8; font-size: 12px; font-style: italic; font-weight: 600;">Locked</span>
+                <button *ngIf="event.status !== 'COMPLETED' && event.status !== 'CANCELLED'" class="btn-cancel-small" (click)="openCancelModal(event.eventID || event.id)">Abort</button>
+                <span *ngIf="event.status === 'COMPLETED' || event.status === 'CANCELLED'" style="color: #94a3b8; font-size: 12px; font-weight: 600; font-style: italic;">Locked</span>
               </td>
             </tr>
-            <tr *ngIf="eventList.length === 0">
-              <td colspan="7" class="empty-state">No events found in the database.</td>
-            </tr>
+            <tr *ngIf="filteredEventList.length === 0"><td colspan="7" class="empty-state">No events match your search parameters.</td></tr>
           </tbody>
         </table>
       </div>
 
       <div class="pagination-container" *ngIf="totalPages > 1">
-        <button class="page-btn nav-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg> Prev
-        </button>
-        <div class="page-numbers">
-          <button *ngFor="let p of getPagesArray()" class="page-btn" [class.active]="p === currentPage" (click)="changePage(p)">
-            {{ p }}
-          </button>
-        </div>
-        <button class="page-btn nav-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
-          Next <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </button>
+        <button class="page-btn nav-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Prev</button>
+        <div class="page-numbers"><button *ngFor="let p of getPagesArray()" class="page-btn" [class.active]="p === currentPage" (click)="changePage(p)">{{ p }}</button></div>
+        <button class="page-btn nav-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">Next</button>
       </div>
-
     </div>
   </div>
 </div>

@@ -13,12 +13,13 @@ export class CreateEventComponent implements OnInit {
   showMessage: boolean = false; responseMessage: string = '';
   
   eventList: any[] = [];
+  filteredEventList: any[] = []; 
   staffList: any[] = [];
   
+  searchTerm: string = ''; 
   currentPage: number = 1; itemsPerPage: number = 10; totalPages: number = 0;
   paginatedEventList: any[] = [];
 
-  // --- NEW: Custom Modal Variables ---
   showCancelModal: boolean = false;
   eventToCancelId: number | null = null;
 
@@ -33,7 +34,6 @@ export class CreateEventComponent implements OnInit {
       assignedStaffUsername: [''],
       maxCapacity: ['', [Validators.required, Validators.min(1)]]
     });
-
     this.getEvent();
     this.getStaffList();
   }
@@ -43,19 +43,36 @@ export class CreateEventComponent implements OnInit {
   getEvent(): void {
     this.httpService.GetAllevents().subscribe(data => {
       this.eventList = data;
-      this.calculatePagination();
+      this.filterEvents(); 
     });
   }
 
+  // --- SEARCH ENGINE ---
+  filterEvents() {
+    if (!this.searchTerm) {
+      this.filteredEventList = [...this.eventList];
+    } else {
+      const term = this.searchTerm.toLowerCase();
+      this.filteredEventList = this.eventList.filter(e => 
+        e.title?.toLowerCase().includes(term) ||
+        e.location?.toLowerCase().includes(term) ||
+        e.status?.toLowerCase().includes(term) ||
+        e.assignedStaffUsername?.toLowerCase().includes(term)
+      );
+    }
+    this.calculatePagination();
+  }
+
   calculatePagination(): void {
-    this.totalPages = Math.ceil(this.eventList.length / this.itemsPerPage);
+    this.totalPages = Math.ceil(this.filteredEventList.length / this.itemsPerPage);
     if (this.currentPage > this.totalPages && this.totalPages > 0) this.currentPage = this.totalPages;
+    if (this.currentPage < 1) this.currentPage = 1;
     this.updatePaginatedList();
   }
 
   updatePaginatedList(): void {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    this.paginatedEventList = this.eventList.slice(startIndex, startIndex + this.itemsPerPage);
+    this.paginatedEventList = this.filteredEventList.slice(startIndex, startIndex + this.itemsPerPage);
   }
 
   changePage(page: number): void { if (page >= 1 && page <= this.totalPages) { this.currentPage = page; this.updatePaginatedList(); } }
@@ -70,24 +87,22 @@ export class CreateEventComponent implements OnInit {
           setTimeout(() => this.showMessage = false, 3000);
         },
         (error: any) => {
-          this.showError = true; this.errorMessage = "Failed to draft the event. Please try again.";
+          this.showError = true; this.errorMessage = "Failed to draft the event.";
           setTimeout(() => this.showError = false, 3000);
         }
       );
     } else { this.itemForm.markAllAsTouched(); }
   }
 
-  // --- NEW: Custom Modal Methods ---
   openCancelModal(eventId: number): void {
     this.eventToCancelId = eventId;
     this.showCancelModal = true;
   }
-
   closeCancelModal(): void {
     this.showCancelModal = false;
     this.eventToCancelId = null;
   }
-
+  
   confirmCancel(): void {
     if (this.eventToCancelId) {
       this.httpService.cancelEvent(this.eventToCancelId).subscribe(
@@ -99,8 +114,7 @@ export class CreateEventComponent implements OnInit {
           setTimeout(() => this.showMessage = false, 4000);
         }, 
         error => {
-          this.showError = true;
-          this.errorMessage = "Failed to cancel the event.";
+          this.showError = true; this.errorMessage = "Failed to cancel the event.";
           this.closeCancelModal();
           setTimeout(() => this.showError = false, 4000);
         }

@@ -1,115 +1,115 @@
 <div class="page-wrapper animate-slide-up">
   <div class="page-header">
     <div class="header-icon navy-bg">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
     </div>
     <div class="header-text">
-      <h2>Resource Allocation</h2>
-      <p>Bind available inventory and quantities to scheduled events.</p>
+      <h2>Event Manifest Builder</h2>
+      <p>Batch allocate physical inventory to events seamlessly.</p>
     </div>
   </div>
 
-  <div class="content-grid">
-    <div class="enterprise-card form-card">
-      <h3>Assign Asset</h3>
+  <div *ngIf="showMessage" class="alert alert-success">{{ responseMessage }}</div>
+  <div *ngIf="showError" class="alert alert-danger">{{ errorMessage }}</div>
 
-      <div *ngIf="showMessage" class="alert alert-success">{{ responseMessage }}</div>
-      <div *ngIf="showError" class="alert alert-danger">{{ errorMessage }}</div>
-
-      <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
-        
-        <div class="form-group">
-          <label>Target Event</label>
-          <div style="display: flex; gap: 15px; align-items: center;">
-            <select formControlName="eventId" style="flex: 1;">
-              <option value="" disabled selected>-- Select an Event --</option>
-              <option *ngFor="let ev of eventList" [value]="ev.eventID || ev.id">
-                #{{ev.eventID || ev.id || '...'}} - {{ ev.title || ev.name }}
-              </option>
-            </select>
-            
-            <span class="status-badge" 
-                  *ngIf="getSelectedEventStatus()" 
-                  [ngClass]="getSelectedEventStatus().toLowerCase()">
-              {{ getSelectedEventStatus() }}
-            </span>
-          </div>
-          <span class="validation-error" *ngIf="itemForm.get('eventId')?.touched && itemForm.get('eventId')?.invalid">Required</span>
-        </div>
-
-        <div class="form-group">
-          <label>Available Resource</label>
-          <select formControlName="resourceId">
-            <option value="" disabled selected>-- Select a Resource --</option>
-            <option *ngFor="let res of resourceList" [value]="res.resourceID || res.id">
-              #{{res.resourceID || res.id || '...'}} - {{ res.name }}
-            </option>
-          </select>
-          <span class="validation-error" *ngIf="itemForm.get('resourceId')?.touched && itemForm.get('resourceId')?.invalid">Required</span>
-        </div>
-
-        <div class="form-group">
-          <label>Quantity Required</label>
-          <input type="number" formControlName="quantity" placeholder="Enter amount to allocate" min="1">
-          <span class="validation-error" *ngIf="itemForm.get('quantity')?.touched && itemForm.get('quantity')?.errors?.['required']">Please enter a valid quantity.</span>
-          <span class="validation-error" *ngIf="itemForm.get('quantity')?.touched && itemForm.get('quantity')?.errors?.['min']">Quantity must be at least 1.</span>
-          <span class="validation-error" *ngIf="itemForm.get('quantity')?.touched && itemForm.get('quantity')?.errors?.['max']">Exceeds available stock! Maximum allowed is {{ selectedResourceMax }}.</span>
-        </div>
-
-        <button type="submit" class="btn-primary navy-btn" [disabled]="!itemForm.valid">Bind Allocation</button>
-      </form>
-    </div>
-
-    <div class="enterprise-card table-card">
-      <h3>Active Allocations Registry</h3>
-      <div class="table-responsive">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Alloc. ID</th>
-              <th>Resource Allocated</th>
-              <th>Target Event</th>
-              <th>Quantity</th>
-              <th>Lifecycle Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let alloc of paginatedAllocationList; let i = index">
-              <td class="id-col">#{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
-              <td class="fw-bold" style="color: var(--c-teal);">{{ alloc.resource?.name || 'Unknown Asset' }}</td>
-              <td>{{ alloc.event?.title || alloc.event?.name || 'Unknown Event' }}</td>
-              <td class="fw-bold" style="color: var(--c-orange);">{{ alloc.quantity != null ? alloc.quantity : 1 }} Units</td>
-              <td>
-                <span class="status-badge" 
-                      [ngClass]="alloc.status === 'RETURNED' ? 'completed' : 'ongoing'">
-                  {{ alloc.status || 'DEPLOYED' }}
-                </span>
-              </td>
-            </tr>
-            <tr *ngIf="allocationList.length === 0">
-              <td colspan="5" class="empty-state">No active allocations found in the registry.</td>
-            </tr>
-          </tbody>
-        </table>
+  <div class="manifest-grid">
+    <div class="enterprise-card pane-left">
+      <div class="table-header-flex">
+        <h3>Master Inventory</h3>
+      </div>
+      
+      <div class="global-search-wrapper" style="max-width: 100%;">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" [(ngModel)]="resourceSearchTerm" placeholder="Search inventory by name or type...">
       </div>
 
-      <div class="pagination-container" *ngIf="totalPages > 1">
-        <button class="page-btn nav-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg> Prev
-        </button>
-        <div class="page-numbers">
-          <button *ngFor="let p of getPagesArray()" class="page-btn" [class.active]="p === currentPage" (click)="changePage(p)">
-            {{ p }}
+      <div class="resource-list">
+        <div class="resource-item" *ngFor="let res of filteredResources" [class.out-of-stock]="res.quantity <= 0">
+          <div class="res-info">
+            <strong>{{ res.name }}</strong>
+            <span [ngClass]="res.quantity > 0 ? 'text-teal' : 'text-danger'">{{ res.quantity }} Units Available</span>
+          </div>
+          <button class="btn-add" (click)="addToManifest(res)" [disabled]="res.quantity <= 0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
           </button>
         </div>
-        <button class="page-btn nav-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
-          Next <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </button>
+        <div *ngIf="filteredResources.length === 0" class="empty-state">No resources match your search.</div>
+      </div>
+    </div>
+
+    <div class="enterprise-card pane-right">
+      <div class="manifest-header">
+        <h3>Deployment Manifest</h3>
+        <select [(ngModel)]="selectedEventId" class="event-select">
+          <option [ngValue]="null" disabled>-- Select Target Event --</option>
+          <option *ngFor="let ev of eventList" [ngValue]="ev.eventID || ev.id">
+            {{ ev.title }} ({{ ev.status }})
+          </option>
+        </select>
       </div>
 
+      <div class="manifest-items">
+        <div class="empty-manifest" *ngIf="manifest.length === 0">
+          Search inventory on the left and click "+" to build your event manifest.
+        </div>
+
+        <div class="manifest-row" *ngFor="let item of manifest; let i = index">
+          <div class="row-info">
+            <strong>{{ item.resource.name }}</strong>
+            <small>Max: {{ item.resource.quantity }}</small>
+          </div>
+          <div class="row-controls">
+            <input type="number" [(ngModel)]="item.quantity" (ngModelChange)="validateQuantity(item)" min="1" [max]="item.resource.quantity">
+            <button class="btn-remove" (click)="removeFromManifest(i)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" style="margin-top: 20px;" (click)="deployManifest()">🚀 Deploy Full Manifest</button>
+    </div>
+  </div>
+
+  <div class="enterprise-card table-card" style="margin-top: 30px;">
+    <div class="table-header-flex" style="padding: 25px 25px 0 25px; border-bottom: none;">
+      <h3>Active Allocations Registry</h3>
+      <div class="global-search-wrapper" style="margin-bottom: 0;">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" [(ngModel)]="allocationSearchTerm" (ngModelChange)="filterAllocations()" placeholder="Search by Asset, Event, or Status...">
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Alloc. ID</th>
+            <th>Resource Allocated</th>
+            <th>Target Event</th>
+            <th>Quantity</th>
+            <th>Lifecycle Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let alloc of paginatedAllocationList; let i = index">
+            <td class="id-col">#{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+            <td class="fw-bold" style="color: var(--c-teal);">{{ alloc.resource?.name }}</td>
+            <td>{{ alloc.event?.title }}</td>
+            <td class="fw-bold" style="color: var(--c-orange);">{{ alloc.quantity }} Units</td>
+            <td><span class="status-badge" [ngClass]="alloc.status === 'RETURNED' ? 'completed' : 'ongoing'">{{ alloc.status || 'DEPLOYED' }}</span></td>
+          </tr>
+          <tr *ngIf="filteredAllocationList.length === 0">
+            <td colspan="5" class="empty-state">No allocations match your search parameters.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="pagination-container" *ngIf="totalPages > 1">
+      <button class="page-btn nav-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Prev</button>
+      <div class="page-numbers"><button *ngFor="let p of getPagesArray()" class="page-btn" [class.active]="p === currentPage" (click)="changePage(p)">{{ p }}</button></div>
+      <button class="page-btn nav-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">Next</button>
     </div>
   </div>
 </div>

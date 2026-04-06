@@ -2,20 +2,14 @@
 
   <div class="custom-loader-overlay fixed-overlay" *ngIf="isPrinting">
     <div class="animated-brand-logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="12 2 2 22 12 17 22 22 12 2" class="brand-poly"></polygon>
-        <circle cx="12" cy="12" r="2" class="brand-dot"></circle>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 22 12 17 22 22 12 2" class="brand-poly"></polygon><circle cx="12" cy="12" r="2" class="brand-dot"></circle></svg>
     </div>
     <p class="loader-text">Generating Secure High-Res PDF...</p>
   </div>
 
   <div class="page-header">
     <div class="header-icon orange-bg">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-        stroke-linejoin="round">
-        <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"></path>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"></path></svg>
     </div>
     <div class="header-text">
       <h2>Client Portal</h2>
@@ -25,146 +19,105 @@
 
   <div class="tab-navigation">
     <button [class.active]="activeTab === 'CATALOG'" (click)="switchTab('CATALOG')">Discover Events</button>
-    <button [class.active]="activeTab === 'MY_TICKETS'" (click)="switchTab('MY_TICKETS')">My Digital Passes ({{
-      myTickets.length }})</button>
+    <button [class.active]="activeTab === 'MY_TICKETS'" (click)="switchTab('MY_TICKETS')">My Digital Passes ({{ myTickets.length }})</button>
   </div>
 
-  <div class="catalog-grid animate-slide-up" *ngIf="activeTab === 'CATALOG'">
-    <div class="empty-state" *ngIf="availableEvents.length === 0">No events currently open for booking.</div>
+  <div class="animate-slide-up" *ngIf="activeTab === 'CATALOG'">
+    <div class="global-search-wrapper" style="max-width: 100%;">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" [(ngModel)]="catalogSearchTerm" placeholder="Search the catalog for events or locations...">
+    </div>
 
-    <div class="event-card" *ngFor="let ev of availableEvents" [class.is-sold-out]="ev.bookedCount >= ev.maxCapacity">
-      <div class="card-header">
-        <span class="status-badge" [ngClass]="ev.status?.toLowerCase()">{{ ev.status }}</span>
-        <span class="capacity-pill" *ngIf="ev.bookedCount < ev.maxCapacity">
-          {{ ev.maxCapacity - (ev.bookedCount || 0) }} Seats Left
-        </span>
-      </div>
-      
-      <div class="card-body">
-        <h3>{{ ev.title }}</h3>
-        <p class="desc">{{ ev.description }}</p>
+    <div class="empty-state" *ngIf="filteredCatalog.length === 0">No events found matching your search.</div>
 
-        <div class="event-meta">
-          <div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg> {{ ev.dateTime | date:'mediumDate' }}</div>
-          <div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg> {{ ev.location }}</div>
+    <div class="catalog-grid">
+      <div class="event-card" *ngFor="let ev of filteredCatalog" [class.is-sold-out]="ev.bookedCount >= ev.maxCapacity">
+        <div class="card-header">
+          <span class="status-badge" [ngClass]="ev.status?.toLowerCase()">{{ ev.status }}</span>
+          <span class="capacity-pill" *ngIf="ev.bookedCount < ev.maxCapacity">{{ ev.maxCapacity - (ev.bookedCount || 0) }} Seats Left</span>
         </div>
-        <div class="sold-out-stamp" *ngIf="ev.bookedCount >= ev.maxCapacity">SOLD OUT</div>
-      </div>
-      
-      <div class="card-footer">
-        <div class="booking-controls" *ngIf="ev.bookedCount < ev.maxCapacity">
-          <div class="quantity-stepper">
-            <button class="stepper-btn" (click)="decrement(ev.eventID || ev.id)">-</button>
-            <span class="stepper-value">{{ getQuantity(ev.eventID || ev.id) }}</span>
-            <button class="stepper-btn" (click)="increment(ev.eventID || ev.id, ev.maxCapacity - (ev.bookedCount || 0))">+</button>
+        
+        <div class="card-body">
+          <h3>{{ ev.title }}</h3>
+          <p class="desc">{{ ev.description }}</p>
+          <div class="event-meta">
+            <div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> {{ ev.dateTime | date:'mediumDate' }}</div>
+            <div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> {{ ev.location }}</div>
           </div>
-          
-          <button class="btn-book" (click)="bookTicket(ev)">
-            Secure {{ getQuantity(ev.eventID || ev.id) }} Pass<span *ngIf="getQuantity(ev.eventID || ev.id) > 1">es</span>
-          </button>
+          <div class="sold-out-stamp" *ngIf="ev.bookedCount >= ev.maxCapacity">SOLD OUT</div>
         </div>
-
-        <button class="btn-book full-btn" *ngIf="ev.bookedCount >= ev.maxCapacity" disabled>Event Full</button>
+        
+        <div class="card-footer">
+          <div class="booking-controls" *ngIf="ev.bookedCount < ev.maxCapacity">
+            <div class="quantity-stepper">
+              <button class="stepper-btn" (click)="decrement(ev.eventID || ev.id)">-</button>
+              <span class="stepper-value">{{ getQuantity(ev.eventID || ev.id) }}</span>
+              <button class="stepper-btn" (click)="increment(ev.eventID || ev.id, ev.maxCapacity - (ev.bookedCount || 0))">+</button>
+            </div>
+            <button class="btn-book" (click)="bookTicket(ev)">Secure {{ getQuantity(ev.eventID || ev.id) }} Pass<span *ngIf="getQuantity(ev.eventID || ev.id) > 1">es</span></button>
+          </div>
+          <button class="btn-book full-btn" *ngIf="ev.bookedCount >= ev.maxCapacity" disabled>Event Full</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="tickets-grid" *ngIf="activeTab === 'MY_TICKETS'">
-    <div class="empty-state" *ngIf="myTickets.length === 0">You haven't secured any passes yet. Head to Discover Events!</div>
+  <div *ngIf="activeTab === 'MY_TICKETS'">
+    <div class="global-search-wrapper" style="max-width: 100%;">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" [(ngModel)]="ticketSearchTerm" placeholder="Search your wallet by Event Title or Pass ID...">
+    </div>
 
-    <div *ngFor="let item of myTickets" class="digital-ticket animate-slide-up"
-      [class.ticket-expired]="item.status?.toUpperCase() === 'COMPLETED' || item.status?.toUpperCase() === 'CANCELLED'"
-      [class.print-target]="printingTicketId === (item.uniqueTicketId || item.eventID || item.id)">
+    <div class="empty-state" *ngIf="filteredTickets.length === 0">You haven't secured any passes matching your search.</div>
 
-      <div class="ticket-body">
-        
-        <div class="ticket-brand-header">
-          <div class="brand-left">
-            <svg class="brand-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="12 2 2 22 12 17 22 22 12 2"></polygon>
-            </svg>
-            <span class="brand-name">EventMaster</span>
-          </div>
-          <span class="pass-type">OFFICIAL DIGITAL PASS • ADMITS {{ item.quantity || 1 }}</span>
-        </div>
+    <div class="tickets-grid">
+      <div *ngFor="let item of filteredTickets" class="digital-ticket animate-slide-up"
+        [class.ticket-expired]="item.status?.toUpperCase() === 'COMPLETED' || item.status?.toUpperCase() === 'CANCELLED'"
+        [class.print-target]="printingTicketId === (item.eventID || item.id || item.uniqueTicketId)">
 
-        <div class="ticket-top">
-          <div class="event-title">
-            <h3>{{ item.title }}</h3>
-            <span class="status-badge" [ngClass]="item.status?.toLowerCase()">{{ item.status }}</span>
+        <div class="ticket-body">
+          <div class="ticket-brand-header">
+            <div class="brand-left"><svg class="brand-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 22 12 17 22 22 12 2"></polygon></svg><span class="brand-name">EventMaster</span></div>
+            <span class="pass-type">OFFICIAL DIGITAL PASS • ADMITS {{ item.quantity || 1 }}</span>
           </div>
 
-          <button class="btn-download-pdf no-print" *ngIf="item.status?.toUpperCase() !== 'COMPLETED' && item.status?.toUpperCase() !== 'CANCELLED'"
-            (click)="printTicket(item)" [disabled]="isPrinting">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            {{ isPrinting && printingTicketId === (item.uniqueTicketId || item.eventID || item.id) ? 'Preparing...' : 'Save as PDF' }}
-          </button>
-        </div>
+          <div class="ticket-top">
+            <div class="event-title"><h3>{{ item.title }}</h3><span class="status-badge" [ngClass]="item.status?.toLowerCase()">{{ item.status }}</span></div>
+            <button class="btn-download-pdf no-print" *ngIf="item.status?.toUpperCase() !== 'COMPLETED' && item.status?.toUpperCase() !== 'CANCELLED'" (click)="printTicket(item)" [disabled]="isPrinting">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              {{ isPrinting && printingTicketId === (item.eventID || item.id || item.uniqueTicketId) ? 'Preparing...' : 'Save as PDF' }}
+            </button>
+          </div>
 
-        <div class="ticket-details">
-          <div class="detail-row">
-            <div class="detail-block"><label>Date & Time</label>
-              <p class="highlight-text">{{ item.dateTime | date:'medium' }}</p>
+          <div class="ticket-details">
+            <div class="detail-row">
+              <div class="detail-block"><label>Date & Time</label><p class="highlight-text">{{ item.dateTime | date:'medium' }}</p></div>
+              <div class="detail-block"><label>Location / Venue</label><p class="highlight-text">{{ item.location }}</p></div>
             </div>
-            <div class="detail-block"><label>Location / Venue</label>
-              <p class="highlight-text">{{ item.location }}</p>
-            </div>
+            <div class="detail-block"><label>Event Description</label><p>{{ item.description }}</p></div>
           </div>
-          <div class="detail-block"><label>Event Description</label>
-            <p>{{ item.description }}</p>
+          <div class="ticket-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <p><strong>ENTRY PASS ONLY:</strong> Please present this digital pass at the venue entrance.</p>
           </div>
         </div>
 
-        <div class="ticket-note">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-          </svg>
-          <p><strong>ENTRY PASS ONLY:</strong> Please present this digital pass at the venue entrance. Official event tickets must be purchased inside the venue to grant access to the main event areas.</p>
-        </div>
+        <div class="ticket-stub">
+          <div class="stub-cutout-top"></div><div class="stub-cutout-bottom"></div>
+          <div class="stub-header">ADMIT {{ item.quantity || 1 }}</div>
 
-      </div>
+          <div class="qr-container" *ngIf="item.status?.toUpperCase() !== 'COMPLETED' && item.status?.toUpperCase() !== 'CANCELLED'">
+            <img [src]="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=AUTH-' + username + '-' + (item.eventID || item.id) + '-' + (item.uniqueTicketId || '0')" alt="QR">
+          </div>
 
-      <div class="ticket-stub">
-        <div class="stub-cutout-top"></div>
-        <div class="stub-cutout-bottom"></div>
+          <div class="qr-container expired-qr" *ngIf="item.status?.toUpperCase() === 'COMPLETED' || item.status?.toUpperCase() === 'CANCELLED'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
+            <span>{{ item.status?.toUpperCase() === 'CANCELLED' ? 'CANCELLED' : 'EXPIRED' }}</span>
+          </div>
 
-        <div class="stub-header">ADMIT {{ item.quantity || 1 }}</div>
-
-        <div class="qr-container" *ngIf="item.status?.toUpperCase() !== 'COMPLETED' && item.status?.toUpperCase() !== 'CANCELLED'">
-          <img
-            [src]="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=AUTH-' + username + '-' + (item.eventID || item.id) + '-' + (item.uniqueTicketId || '0')"
-            alt="QR">
-        </div>
-
-        <div class="qr-container expired-qr" *ngIf="item.status?.toUpperCase() === 'COMPLETED' || item.status?.toUpperCase() === 'CANCELLED'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="9" y1="9" x2="15" y2="15"></line>
-            <line x1="15" y1="9" x2="9" y2="15"></line>
-          </svg>
-          <span>{{ item.status?.toUpperCase() === 'CANCELLED' ? 'CANCELLED' : 'EXPIRED' }}</span>
-        </div>
-
-        <div class="stub-footer">
-          <span>PASS ID</span>
-          <strong>#{{ item.uniqueTicketId || item.eventID || item.id }}</strong>
+          <div class="stub-footer"><span>PASS ID</span><strong>#{{ item.eventID || item.id || item.uniqueTicketId }}</strong></div>
         </div>
       </div>
-
     </div>
   </div>
 </div>

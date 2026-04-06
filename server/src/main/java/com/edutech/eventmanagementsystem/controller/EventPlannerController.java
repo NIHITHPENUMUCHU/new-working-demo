@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -65,17 +66,24 @@ public class EventPlannerController {
         return ResponseEntity.ok(userRepository.findByRole("STAFF"));
     }
 
-    // --- Targeted Notifications Engine for Planner ---
+    // --- BULLETPROOF ENTERPRISE MANIFEST ENDPOINT ---
+    // Uses a Map instead of Entity to prevent Hibernate Proxy/Detachment crashes
+    @PostMapping("/allocate-resources/bulk/{eventId}")
+    public ResponseEntity<List<Allocation>> allocateResourcesBulk(
+            @PathVariable("eventId") Long eventId,
+            @RequestBody List<Map<String, Object>> allocations) {
+        return ResponseEntity.ok(resourceService.allocateResourcesBulk(eventId, allocations));
+    }
+
+    // --- Targeted Notifications Engine ---
     @GetMapping("/notifications")
     public ResponseEntity<List<Notification>> getPlannerNotifications() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         List<Notification> allNotifs = notificationRepository.findAll();
-        
         List<Notification> targetNotifs = allNotifs.stream()
             .filter(n -> "PLANNER".equals(n.getTargetRole()) || ("PLANNER_" + username).equalsIgnoreCase(n.getTargetRole()))
             .sorted((n1, n2) -> n2.getId().compareTo(n1.getId()))
             .collect(Collectors.toList());
-            
         return ResponseEntity.ok(targetNotifs);
     }
 
@@ -91,19 +99,14 @@ public class EventPlannerController {
     public ResponseEntity<?> markAllNotificationsRead() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         List<Notification> allNotifs = notificationRepository.findAll();
-        
         List<Notification> targetNotifs = allNotifs.stream()
             .filter(n -> "PLANNER".equals(n.getTargetRole()) || ("PLANNER_" + username).equalsIgnoreCase(n.getTargetRole()))
             .collect(Collectors.toList());
-            
-        for (Notification n : targetNotifs) {
-            n.setIsRead(true);
-        }
+        for (Notification n : targetNotifs) n.setIsRead(true);
         notificationRepository.saveAll(targetNotifs);
         return ResponseEntity.ok().build();
     }
 
-    // --- EVENT CANCELLATION ENGINE ENDPOINT ---
     @PutMapping("/event/{id}/cancel")
     public ResponseEntity<Event> cancelEvent(@PathVariable Long id) {
         return ResponseEntity.ok(eventService.cancelEvent(id));
