@@ -21,12 +21,13 @@ export class ViewEventsComponent implements OnInit {
   username: string = '';
   editingEventId: number | null = null;
   
-  currentPage: number = 1; itemsPerPage: number = 5; totalPages: number = 0;
+  currentPage: number = 1; itemsPerPage: number = 10; totalPages: number = 0;
   paginatedEventList: any[] = [];
 
   constructor(public router: Router, public httpService: HttpService, private formBuilder: FormBuilder) {}
 
   ngOnInit(): void {
+    // Fetches the exact logged-in username to send to the backend
     this.username = localStorage.getItem('username') || '';
     this.itemForm = this.formBuilder.group({
       status: ['', Validators.required],
@@ -36,6 +37,7 @@ export class ViewEventsComponent implements OnInit {
   }
 
   getEvents() {
+    // Hits the new smart endpoint we just built
     this.httpService.getStaffEvents(this.username).subscribe((data: any[]) => {
       this.eventList = data;
       this.filterEvents();

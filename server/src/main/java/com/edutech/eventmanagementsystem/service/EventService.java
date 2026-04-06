@@ -23,11 +23,15 @@ public class EventService {
     @Autowired private ResourceRepository resourceRepository;
     @Autowired private AllocationRepository allocationRepository;
 
+    // Fetch visibility-filtered events
+    public List<Event> getEventsForStaff(String username) {
+        return eventRepository.findEventsForStaff(username);
+    }
+
     public Event createEvent(Event event) {
         if(event.getBookedCount() == null) event.setBookedCount(0);
         if(event.getStatus() == null || event.getStatus().isEmpty()) event.setStatus("SCHEDULED");
         
-        // BUG FIX: Actually save the Planner's username so notifications know who to target!
         String plannerName = SecurityContextHolder.getContext().getAuthentication().getName();
         event.setPlannerUsername(plannerName);
         
@@ -35,12 +39,14 @@ public class EventService {
         
         try {
             Notification notif = new Notification();
-            notif.setMessage("Planner '" + plannerName + "' drafted event #" + savedEvent.getId() + ": " + savedEvent.getTitle() + " (Capacity: " + savedEvent.getMaxCapacity() + ")");
+            notif.setMessage("Planner '" + plannerName + "' drafted event #" + savedEvent.getId() + ": " + savedEvent.getTitle());
             
-            if (savedEvent.getAssignedStaffUsername() != null && !savedEvent.getAssignedStaffUsername().isEmpty()) {
-                notif.setTargetRole("STAFF_" + savedEvent.getAssignedStaffUsername());
+            // --- SMART NOTIFICATION ROUTING ---
+            String assignee = savedEvent.getAssignedStaffUsername();
+            if (assignee != null && !assignee.trim().isEmpty() && !assignee.equalsIgnoreCase("PUBLIC")) {
+                notif.setTargetRole("STAFF_" + assignee); // Direct Message to specific staff
             } else {
-                notif.setTargetRole("STAFF");
+                notif.setTargetRole("STAFF"); // Global Broadcast to all staff
             }
             notificationRepository.save(notif);
         } catch (Exception e) { e.printStackTrace(); }
@@ -49,17 +55,13 @@ public class EventService {
     }
 
     public List<Event> getAllEvents() { return eventRepository.findAll(); }
+    
     public Event getEventById(Long id) { return eventRepository.findById(id).orElseThrow(() -> new RuntimeException("Event not found")); }
 
     public Event updateEvent(Long id, Event eventDetails) {
         Event event = eventRepository.findById(id).orElseThrow(() -> new RuntimeException("Event not found"));
-        
         String oldStatus = event.getStatus();
-        Integer oldCapacity = event.getMaxCapacity();
-        String oldTitle = event.getTitle();
-        String oldLocation = event.getLocation();
 
-        // Apply Updates
         if(eventDetails.getTitle() != null) event.setTitle(eventDetails.getTitle());
         if(eventDetails.getDescription() != null) event.setDescription(eventDetails.getDescription());
         if(eventDetails.getDateTime() != null) event.setDateTime(eventDetails.getDateTime());
@@ -69,9 +71,7 @@ public class EventService {
 
         Event updatedEvent = eventRepository.save(event);
 
-        // --- INTELLIGENT RECLAMATION ENGINE (COMPLETED EVENTS) ---
-        boolean justCompleted = (oldStatus == null || !oldStatus.equalsIgnoreCase("COMPLETED")) 
-                                && "COMPLETED".equalsIgnoreCase(updatedEvent.getStatus());
+        boolean justCompleted = (oldStatus == null || !oldStatus.equalsIgnoreCase("COMPLETED")) && "COMPLETED".equalsIgnoreCase(updatedEvent.getStatus());
         int totalReclaimed = 0;
         if (justCompleted) {
             List<Allocation> eventAllocations = allocationRepository.findByEvent(updatedEvent);
@@ -88,43 +88,23 @@ public class EventService {
             }
         }
 
-        // Trigger Update Notifications
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            boolean statusChanged = !Objects.equals(oldStatus, updatedEvent.getStatus());
-            boolean capacityChanged = !Objects.equals(oldCapacity, updatedEvent.getMaxCapacity());
-            boolean titleChanged = !Objects.equals(oldTitle, updatedEvent.getTitle());
-            boolean locationChanged = !Objects.equals(oldLocation, updatedEvent.getLocation());
-
-            if (statusChanged || capacityChanged || titleChanged || locationChanged) {
+            if (!Objects.equals(oldStatus, updatedEvent.getStatus())) {
                 Notification notif = new Notification();
-                StringBuilder msgBuilder = new StringBuilder("Staff '" + username + "' updated Event #" + updatedEvent.getId() + ". Changes: ");
-                if (titleChanged) msgBuilder.append("Title, ");
-                if (locationChanged) msgBuilder.append("Location, ");
-                if (statusChanged) msgBuilder.append("Status (").append(updatedEvent.getStatus()).append("), ");
-                if (capacityChanged) msgBuilder.append("Capacity, ");
-                
-                String msg = msgBuilder.toString();
-                if (msg.endsWith(", ")) { msg = msg.substring(0, msg.length() - 2) + "."; }
-                
-                if (justCompleted && totalReclaimed > 0) {
-                    msg += " SYSTEM ACTION: Successfully reclaimed " + totalReclaimed + " physical assets back into the master inventory.";
-                }
+                String msg = "Staff '" + username + "' updated Event #" + updatedEvent.getId() + " Status to: " + updatedEvent.getStatus() + ".";
+                if (justCompleted && totalReclaimed > 0) { msg += " Reclaimed " + totalReclaimed + " assets."; }
                 notif.setMessage(msg);
                 
-                // Route back to the specific planner
                 if (updatedEvent.getPlannerUsername() != null && !updatedEvent.getPlannerUsername().isEmpty()) {
                     notif.setTargetRole("PLANNER_" + updatedEvent.getPlannerUsername());
-                } else {
-                    notif.setTargetRole("PLANNER");
-                }
+                } else { notif.setTargetRole("PLANNER"); }
                 notificationRepository.save(notif);
             }
         } catch (Exception e) { e.printStackTrace(); }
         return updatedEvent;
     }
 
-    // --- EVENT CANCELLATION ENGINE ---
     public Event cancelEvent(Long id) {
         Event event = eventRepository.findById(id).orElseThrow(() -> new RuntimeException("Event not found"));
         String oldStatus = event.getStatus();
@@ -134,8 +114,6 @@ public class EventService {
 
         if (!"CANCELLED".equalsIgnoreCase(oldStatus) && !"COMPLETED".equalsIgnoreCase(oldStatus)) {
             List<Allocation> eventAllocations = allocationRepository.findByEvent(updatedEvent);
-            int totalReclaimed = 0;
-            
             for (Allocation alloc : eventAllocations) {
                 if ("DEPLOYED".equalsIgnoreCase(alloc.getStatus()) || alloc.getStatus() == null) {
                     Resource res = alloc.getResource();
@@ -144,24 +122,17 @@ public class EventService {
                     resourceRepository.save(res);
                     alloc.setStatus("RETURNED");
                     allocationRepository.save(alloc);
-                    totalReclaimed += alloc.getQuantity();
                 }
             }
-            
             try {
                 Notification notif = new Notification();
                 String plannerName = SecurityContextHolder.getContext().getAuthentication().getName();
-                String msg = "URGENT: Planner '" + plannerName + "' has CANCELLED Event #" + updatedEvent.getId() + " (" + updatedEvent.getTitle() + ").";
-                if (totalReclaimed > 0) {
-                    msg += " " + totalReclaimed + " physical assets were automatically returned to inventory.";
-                }
-                notif.setMessage(msg);
+                notif.setMessage("URGENT: Planner '" + plannerName + "' CANCELLED Event #" + updatedEvent.getId() + ".");
                 
-                if (updatedEvent.getAssignedStaffUsername() != null && !updatedEvent.getAssignedStaffUsername().isEmpty()) {
-                    notif.setTargetRole("STAFF_" + updatedEvent.getAssignedStaffUsername());
-                } else {
-                    notif.setTargetRole("STAFF");
-                }
+                String assignee = updatedEvent.getAssignedStaffUsername();
+                if (assignee != null && !assignee.trim().isEmpty() && !assignee.equalsIgnoreCase("PUBLIC")) {
+                    notif.setTargetRole("STAFF_" + assignee);
+                } else { notif.setTargetRole("STAFF"); }
                 notificationRepository.save(notif);
             } catch (Exception e) { e.printStackTrace(); }
         }

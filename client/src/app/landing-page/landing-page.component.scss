@@ -74,58 +74,59 @@
         }
     }
 
-    /* Holographic Radar Visual */
+    /* --- NEW EVENT DATA CORE VISUAL --- */
     .hero-visual-column {
-        flex: 1; display: flex; justify-content: center; align-items: center; position: relative; height: 500px;
+        flex: 1; display: flex; justify-content: center; align-items: center; position: relative; height: 550px;
         
-        .hologram-radar {
-            position: relative; width: 450px; height: 450px; display: flex; justify-content: center; align-items: center;
+        .event-data-core {
+            position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;
 
-            .radar-circle { position: absolute; border-radius: 50%; border: 1px solid rgba(13, 148, 136, 0.3); }
-            .circle-1 { width: 100%; height: 100%; border-style: dashed; animation: spinSlow 30s linear infinite; }
-            .circle-2 { width: 65%; height: 65%; border: 2px solid rgba(13, 148, 136, 0.15); }
-            .circle-3 { width: 35%; height: 35%; border: 1px solid rgba(234, 88, 12, 0.4); }
+            /* Rings */
+            .core-ring { position: absolute; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.05); }
+            .ring-outer { width: 450px; height: 450px; border-style: dashed; animation: spinSlow 40s linear infinite; }
+            .ring-middle { width: 300px; height: 300px; border: 2px solid rgba(13, 148, 136, 0.1); animation: spinSlow 20s linear infinite reverse; }
 
-            .radar-scanner { position: absolute; width: 50%; height: 50%; top: 0; left: 50%; transform-origin: bottom left; background: linear-gradient(90deg, rgba(13, 148, 136, 0) 0%, rgba(13, 148, 136, 0.4) 100%); border-right: 2px solid var(--c-teal); border-radius: 0 100% 0 0; animation: scanRadar 4s linear infinite; }
+            /* Center Server Hub */
+            .central-hub {
+                position: absolute; width: 90px; height: 90px; background: rgba(15, 23, 42, 0.9); border-radius: 50%; border: 2px solid var(--c-teal); display: flex; justify-content: center; align-items: center; z-index: 5; box-shadow: 0 0 30px rgba(13, 148, 136, 0.4);
+                svg { width: 40px; height: 40px; color: var(--c-teal); z-index: 2; }
+                .hub-pulse { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 2px solid var(--c-teal); animation: pulseOut 2.5s infinite ease-out; }
+            }
 
-            .orbit-path { position: absolute; width: 100%; height: 100%; border-radius: 50%; animation: spinSlow 15s linear infinite; }
-            .path-2 { width: 65%; height: 65%; animation: spinSlow 10s linear infinite reverse; }
-            
-            .data-node { position: absolute; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; top: -20px; left: 50%; transform: translateX(-50%); box-shadow: 0 0 15px currentColor; background: var(--c-navy); border: 2px solid currentColor; svg { width: 20px; height: 20px; color: currentColor; } &.node-teal { color: var(--c-teal); } &.node-orange { color: var(--c-orange); } }
-
-            .radar-core { position: absolute; width: 80px; height: 80px; background: var(--c-navy); border-radius: 50%; border: 2px solid var(--c-teal); display: flex; justify-content: center; align-items: center; z-index: 5; box-shadow: 0 0 30px rgba(13, 148, 136, 0.6); svg { width: 40px; height: 40px; color: var(--c-teal); } &.pulse-teal-core { animation: pulseCore 2s infinite; } }
-
-            .cyber-glass-panel { position: absolute; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(13, 148, 136, 0.5); padding: 15px; border-radius: 8px; color: #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 10;
-                .panel-header { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 800; letter-spacing: 1px; color: #cbd5e1; margin-bottom: 10px; .live-dot { width: 6px; height: 6px; background: #ef4444; border-radius: 50%; animation: pulseGlow 1s infinite; } svg { width: 14px; height: 14px; } }
-                .capacity-bar-track { width: 150px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 8px; .capacity-fill { height: 100%; width: 85%; background: var(--c-teal); box-shadow: 0 0 10px var(--c-teal); } }
-                .panel-footer { font-size: 0.7rem; color: var(--c-teal); font-weight: 700; text-align: right; }
-                .sync-lines { display: flex; flex-direction: column; gap: 6px; .sync-line { height: 4px; background: var(--c-orange); width: 120px; border-radius: 2px; &.short { width: 70px; opacity: 0.6; } } }
+            /* Floating Glass Cards */
+            .cyber-glass-panel { 
+                position: absolute; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); padding: 18px; border-radius: 12px; color: #fff; box-shadow: 0 15px 35px rgba(0,0,0,0.4); z-index: 10; width: 240px;
                 
-                &.panel-left { top: 15%; left: -60px; }
-                &.panel-right { bottom: 20%; right: -80px; }
-                &.float-slow { animation: float 6s ease-in-out infinite; }
-                &.float-medium { animation: float 4s ease-in-out infinite reverse; }
+                .panel-header { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; font-weight: 800; letter-spacing: 1px; color: #94a3b8; margin-bottom: 12px; svg { width: 14px; height: 14px; color: #94a3b8; } .live-dot { width: 6px; height: 6px; border-radius: 50%; animation: blinkDot 1.5s infinite; &.orange { background: var(--c-orange); box-shadow: 0 0 8px var(--c-orange); } &.teal { background: var(--c-teal); box-shadow: 0 0 8px var(--c-teal); } } }
+                .data-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; span { font-size: 0.85rem; color: #cbd5e1; } strong { font-size: 1rem; font-family: 'Montserrat', sans-serif; &.text-teal { color: var(--c-teal); } } }
+                
+                /* Mini UI Elements inside cards */
+                .progress-bar-mini { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; .fill { height: 100%; background: var(--c-orange); box-shadow: 0 0 8px var(--c-orange); border-radius: 2px; } }
+                .barcode-mock { display: flex; gap: 4px; height: 12px; opacity: 0.5; div { background: #fff; width: 2px; height: 100%; &.wide { width: 6px; } } }
+                .status-badge-mini { background: rgba(13, 148, 136, 0.2); color: var(--c-teal); padding: 4px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; border: 1px solid rgba(13, 148, 136, 0.4); }
+
+                /* Positioning & Animation */
+                &.float-card-1 { top: 5%; left: 0px; animation: floatVert 6s ease-in-out infinite; border-top: 2px solid var(--c-orange); }
+                &.float-card-2 { bottom: 15%; left: 40px; animation: floatVert 7s ease-in-out infinite reverse; border-top: 2px solid var(--c-teal); }
+                &.float-card-3 { top: 35%; right: -20px; animation: floatVert 5s ease-in-out infinite 1s; }
             }
         }
     }
 }
 
-/* Instant Zero-Delay Animations */
+/* Animations */
 .anim-1 { animation: slideUpFade 0.5s 0.1s forwards; opacity: 0; }
 .anim-2 { animation: slideUpFade 0.5s 0.2s forwards; opacity: 0; }
 .anim-3 { animation: slideUpFade 0.5s 0.3s forwards; opacity: 0; }
 .anim-4 { animation: slideUpFade 0.5s 0.4s forwards; opacity: 0; }
-.anim-5 { animation: scaleInFade 0.8s 0.5s forwards; opacity: 0; }
 
 @keyframes slideUpFade { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
-@keyframes scaleInFade { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
-@keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.6); } 70% { box-shadow: 0 0 0 6px rgba(13, 148, 136, 0); } 100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); } }
-@keyframes pulseCore { 0% { box-shadow: 0 0 20px rgba(13, 148, 136, 0.4); } 50% { box-shadow: 0 0 40px rgba(13, 148, 136, 0.8); } 100% { box-shadow: 0 0 20px rgba(13, 148, 136, 0.4); } }
 @keyframes panGrid { 0% { transform: translateY(0) translateX(0); } 100% { transform: translateY(40px) translateX(40px); } }
 @keyframes floatOrb { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(50px, 50px) scale(1.1); } }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+@keyframes floatVert { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 @keyframes spinSlow { 100% { transform: rotate(360deg); } }
-@keyframes scanRadar { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes pulseOut { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(2.5); opacity: 0; } }
+@keyframes blinkDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
 /* --- 3. ARCHITECTURE FLOWCHART --- */
 .architecture-section {
