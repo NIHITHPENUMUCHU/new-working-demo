@@ -23,6 +23,7 @@ export class HttpService {
   Login(details: any): Observable<any> {
     return this.http.post(`${this.serverName}/api/user/login`, details);
   }
+  
   registerUser(details: any): Observable<any> {
     return this.http.post(`${this.serverName}/api/user/register`, details);
   }
@@ -39,32 +40,45 @@ export class HttpService {
   createEvent(details: any): Observable<any> {
     return this.http.post(`${this.serverName}/api/planner/event`, details, { headers: this.getHeaders() });
   }
+  
   GetAllevents(): Observable<any> {
     return this.http.get(`${this.serverName}/api/planner/events`, { headers: this.getHeaders() });
   }
+  
   addResource(details: any): Observable<any> {
     return this.http.post(`${this.serverName}/api/planner/resource`, details, { headers: this.getHeaders() });
   }
+  
   GetAllResources(): Observable<any> {
     return this.http.get(`${this.serverName}/api/planner/resources`, { headers: this.getHeaders() });
   }
+  
   allocateResources(eventId: any, resourceId: any, details: any): Observable<any> {
     return this.http.post(`${this.serverName}/api/planner/allocate-resource/${eventId}/${resourceId}`, details, { headers: this.getHeaders() });
   }
+  
   getAllAllocations(): Observable<any> {
     return this.http.get(`${this.serverName}/api/planner/allocations`, { headers: this.getHeaders() });
   }
+  
   getStaffList(): Observable<any> {
     return this.http.get(`${this.serverName}/api/planner/staff-list`, { headers: this.getHeaders() });
+  }
+
+  // --- NEW: EVENT CANCELLATION ENGINE ---
+  cancelEvent(eventId: number): Observable<any> {
+    return this.http.put(`${this.serverName}/api/planner/event/${eventId}/cancel`, {}, { headers: this.getHeaders() });
   }
 
   // --- STAFF ENDPOINTS ---
   getEventDetails(eventId: any): Observable<any> {
     return this.http.get(`${this.serverName}/api/staff/event-details/${eventId}`, { headers: this.getHeaders() });
   }
+  
   updateEvent(eventId: any, details: any): Observable<any> {
     return this.http.put(`${this.serverName}/api/staff/update-setup/${eventId}`, details, { headers: this.getHeaders() });
   }
+  
   getStaffEvents(username: string): Observable<any> {
     return this.http.get(`${this.serverName}/api/staff/events/${username}`, { headers: this.getHeaders() });
   }
@@ -73,10 +87,11 @@ export class HttpService {
   getClientEventDetails(eventId: number): Observable<any> {
     return this.http.get(`${this.serverName}/api/client/event/${eventId}`, { headers: this.getHeaders() });
   }
+  
   getActiveEvents(): Observable<any> {
     return this.http.get(`${this.serverName}/api/client/events/active`, { headers: this.getHeaders() });
   }
-  // NEW: Updated to pass quantity
+  
   bookEventPass(eventId: number, quantity: number): Observable<any> {
     return this.http.post(`${this.serverName}/api/client/book/${eventId}/${quantity}`, {}, { headers: this.getHeaders() });
   }
@@ -85,9 +100,11 @@ export class HttpService {
   getNotifications(rolePath: string): Observable<any> {
     return this.http.get(`${this.serverName}/api/${rolePath}/notifications`, { headers: this.getHeaders() });
   }
+  
   markNotificationRead(rolePath: string, id: number): Observable<any> {
     return this.http.put(`${this.serverName}/api/${rolePath}/notifications/${id}/read`, {}, { headers: this.getHeaders() });
   }
+  
   markAllNotificationsRead(rolePath: string): Observable<any> {
     return this.http.put(`${this.serverName}/api/${rolePath}/notifications/read-all`, {}, { headers: this.getHeaders() });
   }

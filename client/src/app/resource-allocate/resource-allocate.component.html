@@ -20,14 +20,23 @@
       <div *ngIf="showError" class="alert alert-danger">{{ errorMessage }}</div>
 
       <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+        
         <div class="form-group">
           <label>Target Event</label>
-          <select formControlName="eventId">
-            <option value="" disabled selected>-- Select an Event --</option>
-            <option *ngFor="let ev of eventList" [value]="ev.eventID || ev.id">
-              #{{ev.eventID || ev.id || '...'}} - {{ ev.title || ev.name }}
-            </option>
-          </select>
+          <div style="display: flex; gap: 15px; align-items: center;">
+            <select formControlName="eventId" style="flex: 1;">
+              <option value="" disabled selected>-- Select an Event --</option>
+              <option *ngFor="let ev of eventList" [value]="ev.eventID || ev.id">
+                #{{ev.eventID || ev.id || '...'}} - {{ ev.title || ev.name }}
+              </option>
+            </select>
+            
+            <span class="status-badge" 
+                  *ngIf="getSelectedEventStatus()" 
+                  [ngClass]="getSelectedEventStatus().toLowerCase()">
+              {{ getSelectedEventStatus() }}
+            </span>
+          </div>
           <span class="validation-error" *ngIf="itemForm.get('eventId')?.touched && itemForm.get('eventId')?.invalid">Required</span>
         </div>
 
@@ -64,6 +73,7 @@
               <th>Resource Allocated</th>
               <th>Target Event</th>
               <th>Quantity</th>
+              <th>Lifecycle Status</th>
             </tr>
           </thead>
           <tbody>
@@ -72,9 +82,15 @@
               <td class="fw-bold" style="color: var(--c-teal);">{{ alloc.resource?.name || 'Unknown Asset' }}</td>
               <td>{{ alloc.event?.title || alloc.event?.name || 'Unknown Event' }}</td>
               <td class="fw-bold" style="color: var(--c-orange);">{{ alloc.quantity != null ? alloc.quantity : 1 }} Units</td>
+              <td>
+                <span class="status-badge" 
+                      [ngClass]="alloc.status === 'RETURNED' ? 'completed' : 'ongoing'">
+                  {{ alloc.status || 'DEPLOYED' }}
+                </span>
+              </td>
             </tr>
             <tr *ngIf="allocationList.length === 0">
-              <td colspan="4" class="empty-state">No active allocations found in the registry.</td>
+              <td colspan="5" class="empty-state">No active allocations found in the registry.</td>
             </tr>
           </tbody>
         </table>

@@ -1,4 +1,3 @@
-com/edutech/eventmanagementsystem/repository/ResourceRepository.class
 com/edutech/eventmanagementsystem/config/Configurations.class
 com/edutech/eventmanagementsystem/jwt/JwtUtil.class
 com/edutech/eventmanagementsystem/repository/NotificationRepository.class

@@ -59,3 +59,33 @@ h1, h2, h3, h4, h5 { font-family: 'Montserrat', sans-serif; color: var(--primary
     background: white !important;
   }
 }
+
+/* --- GLOBAL EVENT CANCELLATION STYLES --- */
+
+/* Instantly turns the status badge Red on Client, Staff, and Planner pages */
+.status-badge.cancelled { 
+  background: rgba(220, 38, 38, 0.1) !important; 
+  color: #dc2626 !important; 
+  border: 1px solid rgba(220, 38, 38, 0.2) !important; 
+}
+
+/* Specific styling for the Planner's 'Abort Event' button */
+.btn-cancel-small {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+  
+  &:hover {
+    background: #dc2626;
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);
+  }
+}

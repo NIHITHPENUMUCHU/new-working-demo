@@ -81,7 +81,7 @@
     <div class="empty-state" *ngIf="myTickets.length === 0">You haven't secured any passes yet. Head to Discover Events!</div>
 
     <div *ngFor="let item of myTickets" class="digital-ticket animate-slide-up"
-      [class.ticket-expired]="item.status?.toUpperCase() === 'COMPLETED'"
+      [class.ticket-expired]="item.status?.toUpperCase() === 'COMPLETED' || item.status?.toUpperCase() === 'CANCELLED'"
       [class.print-target]="printingTicketId === (item.uniqueTicketId || item.eventID || item.id)">
 
       <div class="ticket-body">
@@ -102,7 +102,7 @@
             <span class="status-badge" [ngClass]="item.status?.toLowerCase()">{{ item.status }}</span>
           </div>
 
-          <button class="btn-download-pdf no-print" *ngIf="item.status?.toUpperCase() !== 'COMPLETED'"
+          <button class="btn-download-pdf no-print" *ngIf="item.status?.toUpperCase() !== 'COMPLETED' && item.status?.toUpperCase() !== 'CANCELLED'"
             (click)="printTicket(item)" [disabled]="isPrinting">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -144,19 +144,19 @@
 
         <div class="stub-header">ADMIT {{ item.quantity || 1 }}</div>
 
-        <div class="qr-container" *ngIf="item.status?.toUpperCase() !== 'COMPLETED'">
+        <div class="qr-container" *ngIf="item.status?.toUpperCase() !== 'COMPLETED' && item.status?.toUpperCase() !== 'CANCELLED'">
           <img
             [src]="'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=AUTH-' + username + '-' + (item.eventID || item.id) + '-' + (item.uniqueTicketId || '0')"
             alt="QR">
         </div>
 
-        <div class="qr-container expired-qr" *ngIf="item.status?.toUpperCase() === 'COMPLETED'">
+        <div class="qr-container expired-qr" *ngIf="item.status?.toUpperCase() === 'COMPLETED' || item.status?.toUpperCase() === 'CANCELLED'">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
             <line x1="9" y1="9" x2="15" y2="15"></line>
             <line x1="15" y1="9" x2="9" y2="15"></line>
           </svg>
-          <span>EXPIRED</span>
+          <span>{{ item.status?.toUpperCase() === 'CANCELLED' ? 'CANCELLED' : 'EXPIRED' }}</span>
         </div>
 
         <div class="stub-footer">

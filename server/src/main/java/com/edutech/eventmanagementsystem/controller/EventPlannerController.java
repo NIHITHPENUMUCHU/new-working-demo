@@ -65,7 +65,7 @@ public class EventPlannerController {
         return ResponseEntity.ok(userRepository.findByRole("STAFF"));
     }
 
-    // --- UPDATED: Targeted Notifications Engine for Planner ---
+    // --- Targeted Notifications Engine for Planner ---
     @GetMapping("/notifications")
     public ResponseEntity<List<Notification>> getPlannerNotifications() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -101,5 +101,11 @@ public class EventPlannerController {
         }
         notificationRepository.saveAll(targetNotifs);
         return ResponseEntity.ok().build();
+    }
+
+    // --- EVENT CANCELLATION ENGINE ENDPOINT ---
+    @PutMapping("/event/{id}/cancel")
+    public ResponseEntity<Event> cancelEvent(@PathVariable Long id) {
+        return ResponseEntity.ok(eventService.cancelEvent(id));
     }
 }

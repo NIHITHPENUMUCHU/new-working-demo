@@ -8,28 +8,15 @@ import { HttpService } from '../../services/http.service';
   styleUrls: ['./resource-allocate.component.scss']
 })
 export class ResourceAllocateComponent implements OnInit {
-  
   itemForm!: FormGroup;  
-  showError: boolean = false; 
-  errorMessage: string = ''; 
-  showMessage: boolean = false; 
-  responseMessage: string = ''; 
-  
-  resourceList: any[] = []; 
-  eventList: any[] = [];
-  allocationList: any[] = []; 
+  showError: boolean = false; errorMessage: string = ''; 
+  showMessage: boolean = false; responseMessage: string = ''; 
+  resourceList: any[] = []; eventList: any[] = []; allocationList: any[] = []; 
   selectedResourceMax: number = 0;
-
-  // --- Pagination Variables ---
-  currentPage: number = 1;
-  itemsPerPage: number = 10;
-  totalPages: number = 0;
+  currentPage: number = 1; itemsPerPage: number = 10; totalPages: number = 0;
   paginatedAllocationList: any[] = [];
 
-  constructor(
-    private formBuilder: FormBuilder, 
-    public httpService: HttpService
-  ) { }
+  constructor(private formBuilder: FormBuilder, public httpService: HttpService) { }
 
   ngOnInit(): void {
     this.itemForm = this.formBuilder.group({
@@ -53,13 +40,8 @@ export class ResourceAllocateComponent implements OnInit {
     this.getAllocations(); 
   }
 
-  getEvent(): void {
-    this.httpService.GetAllevents().subscribe((data: any) => { this.eventList = data; });
-  }
-
-  getResources(): void {
-    this.httpService.GetAllResources().subscribe((data: any) => { this.resourceList = data; });
-  }
+  getEvent(): void { this.httpService.GetAllevents().subscribe((data: any) => { this.eventList = data; }); }
+  getResources(): void { this.httpService.GetAllResources().subscribe((data: any) => { this.resourceList = data; }); }
 
   getAllocations(): void {
     this.httpService.getAllAllocations().subscribe(
@@ -69,16 +51,22 @@ export class ResourceAllocateComponent implements OnInit {
           const eventId = alloc.event?.eventID || alloc.event?.id;
           const resourceId = alloc.resource?.resourceID || alloc.resource?.id;
           const uniqueKey = `${eventId}-${resourceId}`;
-          if (seen.has(uniqueKey)) return false; 
-          seen.add(uniqueKey);
-          return true; 
+          if (seen.has(uniqueKey)) return false; seen.add(uniqueKey); return true; 
         });
         this.calculatePagination();
       }
     );
   }
 
-  // --- Pagination Logic ---
+  // --- RESTORED MISSING HELPER METHOD ---
+  getSelectedEventStatus(): string {
+    if (!this.itemForm || !this.eventList) return '';
+    const selectedId = this.itemForm.get('eventId')?.value;
+    if (!selectedId) return '';
+    const selectedEvent = this.eventList.find((e: any) => e.id == selectedId || e.eventID == selectedId);
+    return selectedEvent && selectedEvent.status ? selectedEvent.status : '';
+  }
+
   calculatePagination(): void {
     this.totalPages = Math.ceil(this.allocationList.length / this.itemsPerPage);
     if (this.currentPage > this.totalPages && this.totalPages > 0) this.currentPage = this.totalPages;
@@ -87,44 +75,26 @@ export class ResourceAllocateComponent implements OnInit {
 
   updatePaginatedList(): void {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.paginatedAllocationList = this.allocationList.slice(startIndex, endIndex);
+    this.paginatedAllocationList = this.allocationList.slice(startIndex, startIndex + this.itemsPerPage);
   }
 
-  changePage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      this.updatePaginatedList();
-    }
-  }
-
-  getPagesArray(): number[] {
-    return Array(this.totalPages).fill(0).map((x, i) => i + 1);
-  }
+  changePage(page: number): void { if (page >= 1 && page <= this.totalPages) { this.currentPage = page; this.updatePaginatedList(); } }
+  getPagesArray(): number[] { return Array(this.totalPages).fill(0).map((x, i) => i + 1); }
 
   onSubmit(): void {
     if (this.itemForm.valid) {
       const formValues = this.itemForm.value;
       this.httpService.allocateResources(formValues.eventId, formValues.resourceId, formValues).subscribe(
         (res: any) => {
-          this.showMessage = true;
-          this.responseMessage = "Resource successfully allocated to the event!";
-          this.showError = false;
-          
-          this.itemForm.reset();
-          this.getResources(); 
-          this.getAllocations(); // Automatically updates pagination
-          
+          this.showMessage = true; this.responseMessage = "Resource successfully allocated to the event!"; this.showError = false;
+          this.itemForm.reset(); this.getResources(); this.getAllocations(); 
           setTimeout(() => this.showMessage = false, 3000);
         },
         (error: any) => {
-          this.showError = true;
-          this.errorMessage = "Failed to allocate resource. Please check availability and try again.";
+          this.showError = true; this.errorMessage = "Failed to allocate resource.";
           setTimeout(() => this.showError = false, 3000);
         }
       );
-    } else {
-      this.itemForm.markAllAsTouched();
-    }
+    } else { this.itemForm.markAllAsTouched(); }
   }
 }
