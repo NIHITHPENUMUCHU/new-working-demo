@@ -5,8 +5,7 @@
       <div class="role-badge">{{ roleName }}</div>
       
       <h1>
-        <ng-container *ngIf="roleName !== 'CLIENT'">Welcome to your Workspace, </ng-container>
-        <ng-container *ngIf="roleName === 'CLIENT'">Welcome, </ng-container>
+        <span class="greeting-text">{{ greeting }}, </span>
         <span class="highlight-name">{{ username }}</span>
       </h1>
       
@@ -96,9 +95,15 @@
         <div class="custom-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
         </div>
-        <div class="metric-text">
+        <div class="metric-text full-width-metric">
           <h2>{{ availableResources }}<small>/{{ totalResources }}</small></h2>
-          <span>Available Resources</span>
+          <span>Available Master Assets</span>
+          <div class="utilization-wrapper">
+            <div class="progress-bg">
+              <div class="progress-fill" [style.width.%]="resourceUtilization"></div>
+            </div>
+            <small class="utilization-label">{{ resourceUtilization }}% of inventory currently deployed</small>
+          </div>
         </div>
       </div>
 
@@ -108,7 +113,7 @@
         </div>
         <div class="metric-text">
           <h2>{{ totalAllocations }}</h2>
-          <span>Active Allocations</span>
+          <span>Active Allocations mapped to Events</span>
         </div>
       </div>
     </div>
@@ -139,6 +144,12 @@
   <ng-container *ngIf="roleName === 'STAFF'">
     <div class="focused-workspace">
       <div class="action-card large-card" routerLink="/view-events">
+        
+        <div class="dynamic-badge teal" *ngIf="staffEventCount > 0">
+          <span class="pulse-dot"></span>
+          {{ staffEventCount }} Event<span *ngIf="staffEventCount > 1">s</span> Assigned To You
+        </div>
+
         <div class="custom-icon teal-fill">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"></circle>
@@ -146,7 +157,7 @@
           </svg>
         </div>
         <h3>Event Operations & Setup</h3>
-        <p>Update live event statuses and operational parameters.</p>
+        <p>View your assigned events, track allocated resources, and update live operational statuses.</p>
         <button class="palette-btn">Initialize Operations</button>
       </div>
     </div>
@@ -156,6 +167,12 @@
     <div class="focused-workspace client-layout">
       
       <div class="action-card large-card" routerLink="/booking-details">
+        
+        <div class="dynamic-badge orange" *ngIf="clientPassCount > 0">
+          <span class="pulse-dot orange-pulse"></span>
+          {{ clientPassCount }} Active Pass<span *ngIf="clientPassCount > 1">es</span> Secured
+        </div>
+
         <div class="custom-icon orange-fill">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>

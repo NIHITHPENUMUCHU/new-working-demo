@@ -73,6 +73,7 @@
               <th>Event Title</th>
               <th>Date</th>
               <th>Assigned Staff</th>
+              <th style="width: 160px;">Capacity Filled</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -90,11 +91,26 @@
               <td style="color: #EA580C; font-weight: 600;">
                 {{ event.assignedStaffUsername ? (event.assignedStaffUsername | titlecase) : 'Any Staff' }}
               </td>
+
+              <td>
+                <div class="mini-progress-wrapper" title="{{ event.bookedCount || 0 }} / {{ event.maxCapacity || 1 }} Seats">
+                  <div class="mini-stats">
+                    <span>{{ event.bookedCount || 0 }}/{{ event.maxCapacity || 1 }}</span>
+                    <strong>{{ event.maxCapacity ? (((event.bookedCount || 0) / event.maxCapacity) * 100 | number:'1.0-0') : 0 }}%</strong>
+                  </div>
+                  <div class="mini-progress-bg">
+                    <div class="mini-progress-fill" 
+                         [style.width.%]="event.maxCapacity ? (((event.bookedCount || 0) / event.maxCapacity) * 100) : 0"
+                         [ngStyle]="{'background': (event.bookedCount || 0) >= (event.maxCapacity || 1) ? 'var(--c-orange)' : 'var(--c-teal)'}">
+                    </div>
+                  </div>
+                </div>
+              </td>
               
               <td><span class="status-badge" [ngClass]="event.status?.toLowerCase()">{{ event.status }}</span></td>
             </tr>
             <tr *ngIf="eventList.length === 0">
-              <td colspan="5" class="empty-state">No events found in the database.</td>
+              <td colspan="6" class="empty-state">No events found in the database.</td>
             </tr>
           </tbody>
         </table>

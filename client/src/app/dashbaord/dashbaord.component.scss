@@ -1,11 +1,11 @@
 :host {
   /* Strict Palette Definitions */
-  --c-navy: #0F172A;        /* Deep Navy Tone */
-  --c-navy-light: #1E293B;  /* Slightly lighter navy for cards */
-  --c-teal: #0D9488;        /* Vibrant Teal Blue */
-  --c-orange: #EA580C;      /* Punchy Burnt Orange */
-  --c-peach: #FED7AA;       /* Soft Peach Tone */
-  --c-peach-light: #FFF7ED; /* Ultra-light peach for backgrounds */
+  --c-navy: #0F172A;        
+  --c-navy-light: #1E293B;  
+  --c-teal: #0D9488;        
+  --c-orange: #EA580C;      
+  --c-peach: #FED7AA;       
+  --c-peach-light: #FFF7ED; 
   
   --bg-base: var(--c-peach-light);
   display: block;
@@ -49,15 +49,15 @@
       letter-spacing: 1px;
     }
 
-    h1 { color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 2.8rem; margin: 0 0 10px 0; letter-spacing: -1px; }
-    p { color: var(--c-peach); font-size: 1.1rem; margin: 0; opacity: 0.9; }
+    h1 { color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 2.6rem; margin: 0 0 10px 0; letter-spacing: -1px; line-height: 1.2; }
+    .greeting-text { color: #cbd5e1; font-weight: 500; font-size: 2rem; }
     
     .highlight-name {
       color: var(--c-teal);
       text-shadow: 0 2px 10px rgba(13, 148, 136, 0.3);
+      font-weight: 800;
     }
     
-    /* System Status Bar Glass-Morphism */
     .system-status-bar {
       display: flex;
       align-items: center;
@@ -88,40 +88,17 @@
 
           svg { width: 18px; height: 18px; }
 
-          &.orange-icon {
-            background: rgba(234, 88, 12, 0.2);
-            color: var(--c-orange);
-          }
+          &.orange-icon { background: rgba(234, 88, 12, 0.2); color: var(--c-orange); }
         }
 
         .status-text {
-          display: flex;
-          flex-direction: column;
-
-          small {
-            color: #94a3b8;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-            margin-bottom: 3px;
-          }
-
-          strong {
-            color: #ffffff;
-            font-size: 0.95rem;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-          }
+          display: flex; flex-direction: column;
+          small { color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 3px; }
+          strong { color: #ffffff; font-size: 0.95rem; font-weight: 500; letter-spacing: 0.3px; }
         }
       }
 
-      .status-divider {
-        width: 1px;
-        height: 30px;
-        background: rgba(255, 255, 255, 0.2);
-        margin: 0 10px;
-      }
+      .status-divider { width: 1px; height: 30px; background: rgba(255, 255, 255, 0.2); margin: 0 10px; }
     }
   }
 
@@ -133,7 +110,7 @@
   }
 }
 
-/* --- Planner Metrics --- */
+/* --- Planner Metrics & Utilization Bar --- */
 .metrics-container { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 40px; }
 
 .metric-card {
@@ -146,8 +123,20 @@
   &.orange-accent { border-left-color: var(--c-orange); .custom-icon { color: var(--c-orange); background: rgba(234, 88, 12, 0.1); } }
   &.navy-accent { border-left-color: var(--c-navy); .custom-icon { color: var(--c-navy); background: rgba(15, 23, 42, 0.1); } }
 
-  .custom-icon { width: 70px; height: 70px; border-radius: 16px; display: flex; align-items: center; justify-content: center; svg { width: 35px; height: 35px; } }
-  .metric-text { h2 { font-size: 2.5rem; margin: 0; color: var(--c-navy); line-height: 1; font-family: 'Montserrat', sans-serif; small { font-size: 1.2rem; color: #94a3b8; } } span { color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; margin-top: 5px; display: block; } }
+  .custom-icon { flex-shrink: 0; width: 70px; height: 70px; border-radius: 16px; display: flex; align-items: center; justify-content: center; svg { width: 35px; height: 35px; } }
+  .metric-text { flex-grow: 1; h2 { font-size: 2.5rem; margin: 0; color: var(--c-navy); line-height: 1; font-family: 'Montserrat', sans-serif; small { font-size: 1.2rem; color: #94a3b8; } } span { color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; margin-top: 5px; display: block; } }
+  .full-width-metric { width: 100%; }
+}
+
+.utilization-wrapper {
+  margin-top: 15px;
+  width: 100%;
+  
+  .progress-bg {
+    width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; margin-bottom: 6px;
+    .progress-fill { height: 100%; background: var(--c-teal); border-radius: 3px; transition: width 1s cubic-bezier(0.16, 1, 0.3, 1); }
+  }
+  .utilization-label { font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
 }
 
 /* --- Action Grids & Cards --- */
@@ -168,7 +157,6 @@
   &:hover {
     background: var(--c-navy); transform: translateY(-5px); box-shadow: 0 15px 35px rgba(15, 23, 42, 0.2);
     .card-indicator { transform: scaleX(1); }
-
     .arrow-btn { transform: translateX(10px); color: var(--c-orange); }
   }
 
@@ -176,13 +164,32 @@
   &.large-card {
     background: #ffffff; text-align: center; border: 1px solid rgba(15, 23, 42, 0.1);
     h3 { color: var(--c-navy); font-size: 1.8rem; margin: 0 0 15px 0; font-family: 'Montserrat', sans-serif; }
-    p { color: #475569; font-size: 1.1rem; margin-bottom: 30px; }
+    p { color: #475569; font-size: 1.1rem; margin-bottom: 30px; line-height: 1.6; }
     
     .custom-icon { width: 90px; height: 90px; margin: 0 auto 25px auto; display: flex; align-items: center; justify-content: center; border-radius: 20px; svg { width: 45px; height: 45px; } &.teal-fill { background: rgba(13, 148, 136, 0.1); color: var(--c-teal); } &.orange-fill { background: rgba(234, 88, 12, 0.1); color: var(--c-orange); } }
     
     &:hover { background: #ffffff; transform: translateY(-5px); box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08); }
   }
 }
+
+/* --- Dynamic Badges for Staff/Client --- */
+.dynamic-badge {
+  position: absolute; top: 20px; right: 20px;
+  padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;
+  display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+
+  &.teal { background: rgba(13, 148, 136, 0.1); color: var(--c-teal); border: 1px solid rgba(13, 148, 136, 0.2); }
+  &.orange { background: rgba(234, 88, 12, 0.1); color: var(--c-orange); border: 1px solid rgba(234, 88, 12, 0.2); }
+
+  .pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--c-teal);
+    box-shadow: 0 0 0 0 rgba(13, 148, 136, 0.4); animation: pulse 2s infinite;
+    &.orange-pulse { background: var(--c-orange); box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.4); animation: pulseOrange 2s infinite; }
+  }
+}
+
+@keyframes pulse { 70% { box-shadow: 0 0 0 6px rgba(13, 148, 136, 0); } 100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0); } }
+@keyframes pulseOrange { 70% { box-shadow: 0 0 0 6px rgba(234, 88, 12, 0); } 100% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0); } }
 
 /* --- Buttons --- */
 .palette-btn {
@@ -207,8 +214,8 @@
     
     .accordion-header {
       padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #ffffff;
-      h4 { margin: 0; color: var(--c-navy); font-size: 1rem; font-weight: 600; }
-      .icon { color: var(--c-teal); font-size: 1.5rem; font-weight: 400; transition: transform 0.3s ease; }
+      h4 { margin: 0; color: var(--c-navy); font-size: 1rem; font-weight: 600; line-height: 1.4; padding-right: 15px; }
+      .icon { color: var(--c-teal); font-size: 1.5rem; font-weight: 400; transition: transform 0.3s ease; flex-shrink: 0; }
       &:hover { background: var(--c-peach-light); }
     }
     
@@ -232,12 +239,7 @@
 
 @media (max-width: 768px) {
   .hero-banner .hero-content .system-status-bar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-    
-    .status-divider {
-      display: none;
-    }
+    flex-direction: column; align-items: flex-start; gap: 15px;
+    .status-divider { display: none; }
   }
 }

@@ -117,3 +117,33 @@
 .table-responsive {
   margin-bottom: 0;
 }
+
+/* --- NEW: Mini Progress Bars for Capacity column --- */
+.mini-progress-wrapper {
+  width: 100%;
+  padding-right: 15px;
+
+  .mini-stats {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 4px;
+    
+    span { font-size: 0.75rem; color: #64748b; font-weight: 600; }
+    strong { font-size: 0.75rem; color: var(--c-navy); font-weight: 800; }
+  }
+
+  .mini-progress-bg {
+    width: 100%; 
+    height: 6px; 
+    background: #e2e8f0; 
+    border-radius: 3px; 
+    overflow: hidden;
+    
+    .mini-progress-fill { 
+      height: 100%; 
+      border-radius: 3px; 
+      transition: width 0.5s ease; 
+    }
+  }
+}
