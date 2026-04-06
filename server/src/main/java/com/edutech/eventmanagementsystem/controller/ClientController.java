@@ -38,26 +38,33 @@ public class ClientController {
         return ResponseEntity.ok(active);
     }
 
-    @PostMapping("/book/{eventId}")
-    public ResponseEntity<?> bookEvent(@PathVariable Long eventId) {
+    // --- UPDATED: Accepts {quantity} in the URL ---
+    @PostMapping("/book/{eventId}/{quantity}")
+    public ResponseEntity<?> bookEvent(@PathVariable Long eventId, @PathVariable int quantity) {
         String clientName = SecurityContextHolder.getContext().getAuthentication().getName();
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
         
-        // Block booking if SOLD OUT
-        if (event.getMaxCapacity() != null && event.getBookedCount() >= event.getMaxCapacity()) {
-            return ResponseEntity.badRequest().body("{\"message\": \"SOLD OUT\"}");
+        // Block booking if requesting more than available capacity
+        if (event.getMaxCapacity() != null && (event.getBookedCount() + quantity) > event.getMaxCapacity()) {
+            return ResponseEntity.badRequest().body("{\"message\": \"Not enough capacity remaining.\"}");
         }
 
-        // Add to booked count
-        event.setBookedCount(event.getBookedCount() + 1);
+        // Add the requested quantity to booked count
+        event.setBookedCount(event.getBookedCount() + quantity);
         eventRepository.save(event);
         
-        // Notify the Event Planner
+        // Notify the Event Planner with the specific quantity booked
         Notification notif = new Notification();
-        notif.setMessage("Client '" + clientName + "' secured a pass for '" + event.getTitle() + "'. Seats filled: " + event.getBookedCount() + "/" + event.getMaxCapacity());
-        notif.setTargetRole("PLANNER");
+        notif.setMessage("Client '" + clientName + "' secured " + quantity + " pass(es) for '" + event.getTitle() + "'. Seats filled: " + event.getBookedCount() + "/" + event.getMaxCapacity());
+        
+        // Securely target the Planner who created the event
+        if (event.getPlannerUsername() != null && !event.getPlannerUsername().isEmpty()) {
+            notif.setTargetRole("PLANNER_" + event.getPlannerUsername());
+        } else {
+            notif.setTargetRole("PLANNER");
+        }
         notificationRepository.save(notif);
         
-        return ResponseEntity.ok().body("{\"message\": \"Successfully booked!\"}");
+        return ResponseEntity.ok().body("{\"message\": \"Successfully booked " + quantity + " tickets!\"}");
     }
 }

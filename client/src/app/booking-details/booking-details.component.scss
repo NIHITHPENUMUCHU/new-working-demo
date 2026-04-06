@@ -82,7 +82,23 @@
     .event-meta { display: flex; flex-direction: column; gap: 10px; .meta-item { display: flex; align-items: center; gap: 10px; color: var(--c-teal); font-weight: 600; font-size: 0.9rem; svg { width: 16px; height: 16px; } } }
   }
 
-  .card-footer { padding: 20px 25px; border-top: 1px solid #f1f5f9; .btn-book { width: 100%; background: var(--c-orange); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; &:hover { background: #c2410c; } } }
+  .card-footer { 
+    padding: 20px 25px; border-top: 1px solid #f1f5f9; 
+    
+    /* --- NEW STEPPER STYLES --- */
+    .booking-controls {
+      display: flex; gap: 12px; width: 100%;
+    }
+    
+    .quantity-stepper {
+      display: flex; align-items: center; background: #f1f5f9; border-radius: 8px; border: 1px solid #e2e8f0; padding: 4px;
+      .stepper-btn { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; width: 32px; height: 32px; font-weight: 800; color: var(--c-navy); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; &:hover { background: var(--c-peach); color: var(--c-orange); border-color: var(--c-orange); } }
+      .stepper-value { width: 32px; text-align: center; font-weight: 800; color: var(--c-navy); font-size: 1rem; }
+    }
+    
+    .btn-book { flex: 1; background: var(--c-orange); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; &:hover { background: #c2410c; } } 
+    .full-btn { width: 100%; }
+  }
 }
 
 .tickets-grid { display: flex; flex-direction: column; gap: 30px; }
@@ -179,39 +195,36 @@
   .detail-row { grid-template-columns: 1fr !important; }
 }
 
-/* --- THE FIX: STRICT PDF PRINT ENGINE --- */
 @media print {
   @page { size: auto; margin: 10mm; }
   
   body { background-color: #ffffff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   
-  /* HIDE EVERYTHING EXCEPT THE TARGET TICKET */
   .page-header, .tab-navigation, .catalog-grid, .custom-loader-overlay, .empty-state, .no-print { display: none !important; }
   .digital-ticket:not(.print-target) { display: none !important; }
 
   .page-wrapper { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
 
-  /* THE FIX: Replaced height: 90mm with min-height & align-items: stretch */
   .print-target {
     display: flex !important;
     flex-direction: row !important;
-    align-items: stretch !important; /* Stretches the dark stub to match the body's new height */
+    align-items: stretch !important; 
     width: 100% !important;
     max-width: 220mm !important;
-    min-height: 90mm !important; /* Allows the ticket to expand vertically to fit the note */
+    min-height: 90mm !important; 
     height: auto !important;
     margin: 0 auto !important;
     border: 2px solid #cbd5e1 !important;
     border-radius: 12px !important;
     box-shadow: none !important;
     page-break-inside: avoid !important;
-    overflow: visible !important; /* Stops the note from being cut off */
+    overflow: visible !important; 
     box-sizing: border-box !important;
   }
 
   .ticket-body { 
     width: 70% !important; 
-    height: auto !important; /* Allow body to grow */
+    height: auto !important; 
     padding: 6mm 8mm !important; 
     box-sizing: border-box !important;
     display: flex !important;
@@ -221,7 +234,7 @@
   
   .ticket-stub { 
     width: 30% !important; 
-    height: auto !important; /* Allow stub to grow */
+    height: auto !important; 
     background-color: #0F172A !important; 
     color: #fff !important; 
     border-left: 3px dashed #cbd5e1 !important; 
@@ -244,16 +257,14 @@
     img { width: 100px !important; height: 100px !important; }
   }
 
-  /* Make sure the note renders beautifully inside the newly expanded space */
   .ticket-note {
     background-color: #FFF7ED !important;
     border-left: 4px solid #EA580C !important;
     padding: 8px 12px !important; 
-    margin-top: 15px !important; /* Reduce margin slightly to save space */
+    margin-top: 15px !important; 
     p { font-size: 0.8rem !important; } 
   }
 
-  /* Tighten up top sections slightly to save vertical space */
   .ticket-brand-header { margin-bottom: 15px !important; padding-bottom: 10px !important; }
   .ticket-top { margin-bottom: 15px !important; padding-bottom: 10px !important; }
   .ticket-details { gap: 15px !important; }

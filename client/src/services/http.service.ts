@@ -54,7 +54,6 @@ export class HttpService {
   getAllAllocations(): Observable<any> {
     return this.http.get(`${this.serverName}/api/planner/allocations`, { headers: this.getHeaders() });
   }
-  // NEW: Fetch staff members for assignment dropdown
   getStaffList(): Observable<any> {
     return this.http.get(`${this.serverName}/api/planner/staff-list`, { headers: this.getHeaders() });
   }
@@ -66,7 +65,6 @@ export class HttpService {
   updateEvent(eventId: any, details: any): Observable<any> {
     return this.http.put(`${this.serverName}/api/staff/update-setup/${eventId}`, details, { headers: this.getHeaders() });
   }
-  // NEW: Securely fetch events assigned to a specific staff member
   getStaffEvents(username: string): Observable<any> {
     return this.http.get(`${this.serverName}/api/staff/events/${username}`, { headers: this.getHeaders() });
   }
@@ -78,8 +76,9 @@ export class HttpService {
   getActiveEvents(): Observable<any> {
     return this.http.get(`${this.serverName}/api/client/events/active`, { headers: this.getHeaders() });
   }
-  bookEventPass(eventId: number): Observable<any> {
-    return this.http.post(`${this.serverName}/api/client/book/${eventId}`, {}, { headers: this.getHeaders() });
+  // NEW: Updated to pass quantity
+  bookEventPass(eventId: number, quantity: number): Observable<any> {
+    return this.http.post(`${this.serverName}/api/client/book/${eventId}/${quantity}`, {}, { headers: this.getHeaders() });
   }
 
   // --- NOTIFICATION ENGINE ---

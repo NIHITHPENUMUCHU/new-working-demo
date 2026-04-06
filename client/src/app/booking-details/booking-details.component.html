@@ -60,9 +60,19 @@
       </div>
       
       <div class="card-footer">
-        <button class="btn-book" [disabled]="ev.bookedCount >= ev.maxCapacity" (click)="bookTicket(ev)">
-          {{ ev.bookedCount >= ev.maxCapacity ? 'Event Full' : 'Secure Entry Pass' }}
-        </button>
+        <div class="booking-controls" *ngIf="ev.bookedCount < ev.maxCapacity">
+          <div class="quantity-stepper">
+            <button class="stepper-btn" (click)="decrement(ev.eventID || ev.id)">-</button>
+            <span class="stepper-value">{{ getQuantity(ev.eventID || ev.id) }}</span>
+            <button class="stepper-btn" (click)="increment(ev.eventID || ev.id, ev.maxCapacity - (ev.bookedCount || 0))">+</button>
+          </div>
+          
+          <button class="btn-book" (click)="bookTicket(ev)">
+            Secure {{ getQuantity(ev.eventID || ev.id) }} Pass<span *ngIf="getQuantity(ev.eventID || ev.id) > 1">es</span>
+          </button>
+        </div>
+
+        <button class="btn-book full-btn" *ngIf="ev.bookedCount >= ev.maxCapacity" disabled>Event Full</button>
       </div>
     </div>
   </div>
@@ -83,7 +93,7 @@
             </svg>
             <span class="brand-name">EventMaster</span>
           </div>
-          <span class="pass-type">OFFICIAL DIGITAL PASS</span>
+          <span class="pass-type">OFFICIAL DIGITAL PASS • ADMITS {{ item.quantity || 1 }}</span>
         </div>
 
         <div class="ticket-top">
@@ -132,7 +142,7 @@
         <div class="stub-cutout-top"></div>
         <div class="stub-cutout-bottom"></div>
 
-        <div class="stub-header">ADMIT ONE</div>
+        <div class="stub-header">ADMIT {{ item.quantity || 1 }}</div>
 
         <div class="qr-container" *ngIf="item.status?.toUpperCase() !== 'COMPLETED'">
           <img

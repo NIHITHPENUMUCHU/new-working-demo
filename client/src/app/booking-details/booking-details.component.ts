@@ -17,6 +17,9 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
   // Tracks which specific ticket to isolate for the PDF
   printingTicketId: any = null;
   isPrinting: boolean = false;
+  
+  // NEW: Tracks selected quantity for each event card
+  ticketQuantities: any = {}; 
 
   private pollingInterval: any; 
 
@@ -82,17 +85,42 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
+  // --- NEW: Stepper Logic ---
+  getQuantity(eventId: any): number {
+    return this.ticketQuantities[eventId] || 1;
+  }
+
+  increment(eventId: any, maxLeft: number): void {
+    let current = this.getQuantity(eventId);
+    if (current < maxLeft && current < 10) { 
+      this.ticketQuantities[eventId] = current + 1;
+    }
+  }
+
+  decrement(eventId: any): void {
+    let current = this.getQuantity(eventId);
+    if (current > 1) {
+      this.ticketQuantities[eventId] = current - 1;
+    }
+  }
+
+  // --- UPDATED: Booking Logic ---
   bookTicket(event: any): void {
+    const eventId = event.eventID || event.id;
+    const qty = this.getQuantity(eventId);
+    
     const newTicket = { 
       ...event, 
-      uniqueTicketId: Date.now() + Math.floor(Math.random() * 1000) 
+      uniqueTicketId: Date.now() + Math.floor(Math.random() * 1000),
+      quantity: qty 
     };
 
-    this.httpService.bookEventPass(event.eventID || event.id).subscribe(() => {
+    this.httpService.bookEventPass(eventId, qty).subscribe(() => {
       this.myTickets.unshift(newTicket);
       localStorage.setItem('myTickets_' + this.username, JSON.stringify(this.myTickets));
       this.activeTab = 'MY_TICKETS'; 
       this.syncTicketsWithDatabase();
+      this.ticketQuantities[eventId] = 1; // Reset stepper
     });
   }
 
@@ -106,7 +134,6 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
     this.isPrinting = true;
     this.printingTicketId = ticket.uniqueTicketId || ticket.eventID || ticket.id;
     
-    // Give Angular time to apply the .print-target class before opening the dialog
     setTimeout(() => {
       window.print();
       this.printingTicketId = null;
