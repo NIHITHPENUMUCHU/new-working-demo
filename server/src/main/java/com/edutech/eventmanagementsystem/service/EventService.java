@@ -59,9 +59,23 @@ public class EventService {
         if (event.getBookedCount() == null) event.setBookedCount(0);
         event.setBookedCount(event.getBookedCount() + quantity);
         eventRepository.save(event);
+
+        // FIX: Notify Planner that a ticket was booked!
+        try {
+            Notification notif = new Notification();
+            String plannerName = event.getPlannerUsername();
+            notif.setMessage("TICKET SECURED: Client '" + username + "' booked " + quantity + " pass(es) for Event #" + event.getId() + " (" + event.getTitle() + ").");
+            
+            if (plannerName != null && !plannerName.isEmpty()) {
+                notif.setTargetRole("PLANNER_" + plannerName);
+            } else {
+                notif.setTargetRole("PLANNER");
+            }
+            notificationRepository.save(notif);
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
-    // --- NEW: CLIENT CANCELLATION ENGINE ---
+    // --- CLIENT CANCELLATION ENGINE ---
     public void cancelEventPass(Long eventId, Integer quantity, String username) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
         if (event.getBookedCount() == null) event.setBookedCount(0);
@@ -71,10 +85,9 @@ public class EventService {
         eventRepository.save(event);
 
         try {
-            // Instantly notify the Planner that seats have opened up!
             Notification notif = new Notification();
             String plannerName = event.getPlannerUsername();
-            notif.setMessage("TICKET ALERT: Client '" + username + "' cancelled " + quantity + " pass(es) for Event #" + event.getId() + " (" + event.getTitle() + "). Capacity has been successfully restored.");
+            notif.setMessage("TICKET ALERT: Client '" + username + "' cancelled " + quantity + " pass(es) for Event #" + event.getId() + " (" + event.getTitle() + "). Capacity restored.");
             
             if (plannerName != null && !plannerName.isEmpty()) {
                 notif.setTargetRole("PLANNER_" + plannerName);

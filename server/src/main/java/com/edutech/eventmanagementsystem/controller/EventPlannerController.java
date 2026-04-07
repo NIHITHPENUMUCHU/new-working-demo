@@ -66,8 +66,6 @@ public class EventPlannerController {
         return ResponseEntity.ok(userRepository.findByRole("STAFF"));
     }
 
-    // --- BULLETPROOF ENTERPRISE MANIFEST ENDPOINT ---
-    // Uses a Map instead of Entity to prevent Hibernate Proxy/Detachment crashes
     @PostMapping("/allocate-resources/bulk/{eventId}")
     public ResponseEntity<List<Allocation>> allocateResourcesBulk(
             @PathVariable("eventId") Long eventId,
@@ -75,15 +73,19 @@ public class EventPlannerController {
         return ResponseEntity.ok(resourceService.allocateResourcesBulk(eventId, allocations));
     }
 
-    // --- Targeted Notifications Engine ---
+    // --- TARGETED NOTIFICATIONS ENGINE (FIXED CASE-SENSITIVITY) ---
     @GetMapping("/notifications")
     public ResponseEntity<List<Notification>> getPlannerNotifications() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         List<Notification> allNotifs = notificationRepository.findAll();
+        
         List<Notification> targetNotifs = allNotifs.stream()
-            .filter(n -> "PLANNER".equals(n.getTargetRole()) || ("PLANNER_" + username).equalsIgnoreCase(n.getTargetRole()))
+            .filter(n -> n.getTargetRole() != null && 
+                        ("PLANNER".equalsIgnoreCase(n.getTargetRole()) || 
+                         ("PLANNER_" + username).equalsIgnoreCase(n.getTargetRole())))
             .sorted((n1, n2) -> n2.getId().compareTo(n1.getId()))
             .collect(Collectors.toList());
+            
         return ResponseEntity.ok(targetNotifs);
     }
 
@@ -99,9 +101,13 @@ public class EventPlannerController {
     public ResponseEntity<?> markAllNotificationsRead() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         List<Notification> allNotifs = notificationRepository.findAll();
+        
         List<Notification> targetNotifs = allNotifs.stream()
-            .filter(n -> "PLANNER".equals(n.getTargetRole()) || ("PLANNER_" + username).equalsIgnoreCase(n.getTargetRole()))
+            .filter(n -> n.getTargetRole() != null && 
+                        ("PLANNER".equalsIgnoreCase(n.getTargetRole()) || 
+                         ("PLANNER_" + username).equalsIgnoreCase(n.getTargetRole())))
             .collect(Collectors.toList());
+            
         for (Notification n : targetNotifs) n.setIsRead(true);
         notificationRepository.saveAll(targetNotifs);
         return ResponseEntity.ok().build();
