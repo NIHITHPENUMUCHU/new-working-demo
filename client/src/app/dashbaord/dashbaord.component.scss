@@ -139,6 +139,32 @@
   .utilization-label { font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
 }
 
+/* --- RECENT EVENTS TABLE STYLES --- */
+.table-responsive { overflow-x: auto; width: 100%; }
+.data-table {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  th { background: #f8fafc; color: #475569; text-align: left; padding: 15px 25px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+  td { padding: 18px 25px; border-bottom: 1px solid #f1f5f9; color: #475569; font-size: 14px; vertical-align: middle; }
+  tr:hover td { background: var(--c-peach-light); }
+  tr:last-child td { border-bottom: none; }
+  .fw-bold { font-weight: 700; color: var(--c-navy); font-size: 15px; }
+  .id-col { font-family: monospace; font-weight: 700; color: #94a3b8; font-size: 13px; }
+}
+
+.status-badge {
+  padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; display: inline-block; letter-spacing: 0.5px;
+  &.scheduled { background: rgba(13, 148, 136, 0.1); color: var(--c-teal); border: 1px solid rgba(13, 148, 136, 0.2); }
+  &.ongoing { background: rgba(234, 88, 12, 0.1); color: var(--c-orange); border: 1px solid rgba(234, 88, 12, 0.2); }
+  &.completed { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+  &.cancelled { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+}
+
+.mini-progress-wrapper {
+  width: 120px;
+  .mini-stats { display: flex; justify-content: flex-end; font-size: 11px; margin-bottom: 4px; span { color: #64748b; font-weight: 600; } }
+  .mini-progress-bg { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; .mini-progress-fill { height: 100%; transition: width 0.5s ease; } }
+}
+
 /* --- Action Grids & Cards --- */
 .section-title { color: var(--c-navy); font-size: 1.4rem; font-family: 'Montserrat', sans-serif; margin-bottom: 20px; }
 

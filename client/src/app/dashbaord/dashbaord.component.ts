@@ -20,9 +20,10 @@ export class DashbaordComponent implements OnInit, OnDestroy {
   activeAllocations: number = 0; itemsReturned: number = 0; 
   resourceUtilization: number = 0;
   
-  // LIVE MONITOR ARRAY
+  // LIVE MONITOR & LEDGER ARRAYS
   activeEvents: any[] = [];
   rawEventData: any[] = []; 
+  recentEvents: any[] = []; // <-- NEW: Array for the dashboard ledger table
 
   staffEventCount: number = 0;
   clientPassCount: number = 0;
@@ -88,25 +89,26 @@ export class DashbaordComponent implements OnInit, OnDestroy {
           this.ongoingEvents = data.filter(e => e.status?.toUpperCase() === 'ONGOING').length;
           this.completedEvents = data.filter(e => e.status?.toUpperCase() === 'COMPLETED').length;
 
-          // --- FIX: Bulletproof Live Capacity Math ---
+          // Process Top 4 events for Capacity Monitor
           this.activeEvents = data
             .filter(e => e.status?.toUpperCase() === 'SCHEDULED' || e.status?.toUpperCase() === 'ONGOING')
             .map(e => {
-              // Strictly cast to numbers to prevent NaN calculation errors
               const booked = Number(e.bookedCount) || 0;
-              const max = Number(e.maxCapacity) || 1; // Prevent divide by zero
-              
+              const max = Number(e.maxCapacity) || 1; 
               let fillPercentage = Math.round((booked / max) * 100);
-              
-              // Cap the percentage between 0 and 100 visually
               if (fillPercentage > 100) fillPercentage = 100;
               if (fillPercentage < 0) fillPercentage = 0;
-
-              // Pass the sanitized numbers to the HTML
               return { ...e, fillPercentage, safeBooked: booked, safeMax: max };
             })
-            .sort((a, b) => b.fillPercentage - a.fillPercentage) // Sort highest demand first
-            .slice(0, 4); // Display top 4
+            .sort((a, b) => b.fillPercentage - a.fillPercentage) 
+            .slice(0, 4);
+
+          // NEW: Grab the 5 most recently created events for the Ledger Table
+          this.recentEvents = [...data].sort((a, b) => {
+            const idA = a.eventID || a.id || 0;
+            const idB = b.eventID || b.id || 0;
+            return idB - idA; // Sort highest ID (newest) first
+          }).slice(0, 5);
         }
     });
 

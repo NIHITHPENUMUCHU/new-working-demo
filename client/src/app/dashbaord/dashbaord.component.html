@@ -137,6 +137,60 @@
       </div>
     </div>
 
+    <div class="enterprise-card table-card" style="margin-top: 30px; margin-bottom: 40px; padding: 0; overflow: hidden; border-radius: 16px; background: #fff; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05); border: 1px solid #e2e8f0;">
+      <div class="table-header-flex" style="padding: 25px 25px 0 25px; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+          <h3 class="section-title" style="margin: 0; font-size: 1.4rem;">Recently Drafted Events</h3>
+          <p style="margin: 5px 0 0 0; color: #64748b; font-size: 0.95rem;">Review your latest entries in the global registry.</p>
+        </div>
+        <button class="palette-btn navy-btn" routerLink="/create-event" style="padding: 10px 20px; font-size: 0.9rem;">
+          View Full Registry &rarr;
+        </button>
+      </div>
+
+      <div class="table-responsive" style="margin-top: 20px; width: 100%; overflow-x: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Event Title</th>
+              <th>Date & Location</th>
+              <th>Status</th>
+              <th>Capacity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let ev of recentEvents">
+              <td class="id-col">#{{ ev.eventID || ev.id }}</td>
+              <td class="fw-bold">{{ ev.title }}</td>
+              <td>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <span style="color: var(--c-navy); font-weight: 600;">{{ ev.dateTime | date:'mediumDate' }}</span>
+                  <span style="color: #64748b; font-size: 12px;">{{ ev.location }}</span>
+                </div>
+              </td>
+              <td><span class="status-badge" [ngClass]="ev.status?.toLowerCase()">{{ ev.status }}</span></td>
+              <td>
+                <div class="mini-progress-wrapper" title="{{ ev.bookedCount || 0 }} / {{ ev.maxCapacity || 1 }} Seats">
+                  <div class="mini-stats">
+                    <span>{{ ev.bookedCount || 0 }}/{{ ev.maxCapacity || 1 }}</span>
+                  </div>
+                  <div class="mini-progress-bg">
+                    <div class="mini-progress-fill" 
+                         [style.width.%]="ev.maxCapacity ? (((ev.bookedCount || 0) / ev.maxCapacity) * 100) : 0" 
+                         [ngStyle]="{'background': (ev.bookedCount || 0) >= (ev.maxCapacity || 1) ? 'var(--c-orange)' : 'var(--c-teal)'}">
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="recentEvents.length === 0">
+              <td colspan="5" class="empty-state" style="text-align: center; padding: 40px; color: #94a3b8; font-style: italic;">No events have been drafted yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
     <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
       <h3 class="section-title" style="margin-bottom: 0;">Quick Actions</h3>
       <button class="palette-btn navy-btn" (click)="exportToCSV()" style="padding: 10px 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
