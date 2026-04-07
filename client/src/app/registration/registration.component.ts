@@ -76,7 +76,6 @@ export class RegistrationComponent implements OnInit, OnDestroy {
         authControl?.clearValidators();
       }
       
-      // Reset the inputs and update the form's validity state
       authControl?.setValue(''); 
       authControl?.updateValueAndValidity();
       securityControls.forEach(ctrl => {
@@ -90,6 +89,21 @@ export class RegistrationComponent implements OnInit, OnDestroy {
       this.roleSubscription.unsubscribe();
     }
   }
+
+  // --- LIVE VALIDATION HELPERS ---
+  get isUsernameValid() { return this.itemForm.get('username')?.valid && this.itemForm.get('username')?.dirty; }
+  get isEmailValid() { return this.itemForm.get('email')?.valid && this.itemForm.get('email')?.dirty; }
+  get isRoleValid() { return this.itemForm.get('role')?.valid && this.itemForm.get('role')?.dirty; }
+  get isAuthCodeValid() { return this.itemForm.get('authCode')?.valid && this.itemForm.get('authCode')?.value !== ''; }
+
+  // Dynamic Password Strength Checks
+  get pwdValue() { return this.itemForm.get('password')?.value || ''; }
+  get hasMinLength() { return this.pwdValue.length >= 8; }
+  get hasUpper() { return /[A-Z]/.test(this.pwdValue); }
+  get hasLower() { return /[a-z]/.test(this.pwdValue); }
+  get hasNumber() { return /[0-9]/.test(this.pwdValue); }
+  get hasSymbol() { return /[!@#$%^&*_=+-]/.test(this.pwdValue); }
+  get isPasswordValid() { return this.itemForm.get('password')?.valid && this.itemForm.get('password')?.dirty; }
 
   onSubmit(): void {
     if (this.itemForm.valid) {
@@ -110,7 +124,6 @@ export class RegistrationComponent implements OnInit, OnDestroy {
         (error: any) => {
           this.isLoading = false;
           this.showError = true;
-          // Capture the exact error from Spring Boot (e.g. duplicate email)
           if (error.error && error.error.message) {
             this.errorMessage = error.error.message;
           } else {

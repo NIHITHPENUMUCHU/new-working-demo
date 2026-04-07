@@ -2,8 +2,11 @@
   --c-navy: #0F172A;
   --c-teal: #0D9488;
   --c-orange: #EA580C;
+  --c-green: #10B981; /* NEW */
+  --c-red: #EF4444;   /* NEW */
   --c-peach-light: #FFF7ED;
   --c-peach: #FED7AA;
+  
   display: block;
   width: 100%;
   height: 100vh;
@@ -84,16 +87,16 @@
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
 
     .input-icon { position: absolute; left: 16px; width: 18px; height: 18px; color: #94a3b8; pointer-events: none; }
 
-    /* THE FIX: Matches Forgot Password Background & Border perfectly */
     input {
       width: 100%;
       background: #f8fafc;
       border: 2px solid #e2e8f0;
       color: var(--c-navy);
-      padding: 14px 18px 14px 45px; /* Keeps the padding for the left icon */
+      padding: 14px 45px 14px 45px; /* Ensures padding for both left and right icons */
       border-radius: 8px;
       font-size: 15px;
       transition: all 0.3s ease;
@@ -107,6 +110,22 @@
       }
 
       &::placeholder { color: #94a3b8; }
+    }
+
+    /* --- THE LIVE STATUS ICON (TICK MARK) --- */
+    .status-icon {
+      position: absolute; right: 16px; width: 18px; height: 18px; color: #cbd5e1;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;
+    }
+
+    /* --- LIVE VALIDATION STATES --- */
+    &.is-valid {
+      input { border-color: var(--c-green); background: #ffffff; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+      .status-icon { color: var(--c-green); transform: scale(1.2); filter: drop-shadow(0 0 3px rgba(16, 185, 129, 0.3)); }
+    }
+    
+    &.is-invalid { 
+      input { border-color: var(--c-red); background: #fef2f2; } 
     }
   }
 }

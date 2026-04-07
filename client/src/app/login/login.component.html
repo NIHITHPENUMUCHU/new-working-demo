@@ -44,29 +44,32 @@
       <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
           <label>Username</label>
-          <div class="input-wrapper">
+          <div class="input-wrapper" [class.is-valid]="isUsernameValid" [class.is-invalid]="itemForm.get('username')?.touched && itemForm.get('username')?.invalid">
             <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
             <input type="text" formControlName="username" placeholder="Enter your username">
+            <svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </div>
           <div *ngIf="itemForm.get('username')?.touched && itemForm.get('username')?.invalid" class="validation-error">
             <span *ngIf="itemForm.get('username')?.errors?.['required']">Username is required.</span>
-            <span *ngIf="itemForm.get('username')?.errors?.['pattern']">Must be 4-20 characters (no spaces).</span>
+            <span *ngIf="itemForm.get('username')?.errors?.['pattern']">Must be 4-20 characters (no spaces / symbols allowed).</span>
           </div>
         </div>
 
         <div class="form-group">
           <label>Password</label>
-          <div class="input-wrapper">
+          <div class="input-wrapper" [class.is-valid]="isPasswordValid" [class.is-invalid]="itemForm.get('password')?.touched && itemForm.get('password')?.invalid">
             <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
             </svg>
             <input type="password" formControlName="password" placeholder="Enter your password">
+            <svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </div>
           <div *ngIf="itemForm.get('password')?.touched && itemForm.get('password')?.invalid" class="validation-error">
             <span *ngIf="itemForm.get('password')?.errors?.['required']">Password is required.</span>
+            <span *ngIf="itemForm.get('password')?.errors?.['pattern']">Must be at least 8 characters, 1 uppercase, 1 lowercase, 1 number, and 1 symbol.</span>
           </div>
         </div>
 

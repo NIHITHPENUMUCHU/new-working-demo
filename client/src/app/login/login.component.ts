@@ -13,8 +13,6 @@ export class LoginComponent implements OnInit {
   itemForm!: FormGroup;
   showError: boolean = false;
   errorMessage: string = '';
-  
-  // NEW: Triggers the Animated Frosted-Glass Overlay
   isLoading: boolean = false;
 
   constructor(
@@ -25,16 +23,27 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Removed password regex - backend handles authentication check
+    // Re-introduced the strict enterprise password validator
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*_=+-]).{8,}$/;
+
     this.itemForm = this.formBuilder.group({
       username: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9_-]{4,20}$/)]],
-      password: ['', [Validators.required]]
+      password: ['', [Validators.required, Validators.pattern(passwordRegex)]]
     });
+  }
+
+  // --- LIVE VALIDATION HELPERS ---
+  get isUsernameValid() { 
+    return this.itemForm.get('username')?.valid && this.itemForm.get('username')?.dirty; 
+  }
+  
+  get isPasswordValid() { 
+    return this.itemForm.get('password')?.valid && this.itemForm.get('password')?.dirty; 
   }
 
   onSubmit(): void {
     if (this.itemForm.valid) {
-      this.isLoading = true; // Show loader
+      this.isLoading = true; 
       this.showError = false;
 
       this.httpService.Login(this.itemForm.value).subscribe(
@@ -43,12 +52,10 @@ export class LoginComponent implements OnInit {
             this.authService.saveToken(res.token);
             this.authService.SetRole(res.role); 
 
-            // Save username
             const currentUsername = this.itemForm.value.username;
             const normalizedName = currentUsername.toLowerCase();
             localStorage.setItem('username', currentUsername);
             
-            // Handle Timestamp Rotation
             const oldLoginTime = localStorage.getItem('lastLogin_' + normalizedName);
             if (oldLoginTime) {
                localStorage.setItem('previousLogin_' + normalizedName, oldLoginTime);
@@ -57,9 +64,7 @@ export class LoginComponent implements OnInit {
             }
             localStorage.setItem('lastLogin_' + normalizedName, new Date().toISOString());
 
-            // --- CRITICAL FIX: Route Based on Role ---
             const userRole = res.role.toUpperCase();
-            
             if (userRole === 'PLANNER') {
               this.router.navigateByUrl('/dashboard');
             } else if (userRole === 'STAFF') {
@@ -71,13 +76,13 @@ export class LoginComponent implements OnInit {
             }
 
           } else {
-            this.isLoading = false; // Hide loader
+            this.isLoading = false; 
             this.showError = true;
             this.errorMessage = "Invalid response from server.";
           }
         },
         (error: any) => {
-          this.isLoading = false; // Hide loader
+          this.isLoading = false; 
           this.showError = true;
           this.errorMessage = "Login failed. Incorrect username or password.";
         }
