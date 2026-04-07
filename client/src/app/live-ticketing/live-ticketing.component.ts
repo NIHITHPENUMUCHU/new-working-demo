@@ -10,8 +10,17 @@ import { Router } from '@angular/router';
 })
 export class LiveTicketingComponent implements OnInit, OnDestroy {
   allEvents: any[] = [];
-  filteredEvents: any[] = []; // NEW: For search tracking
-  searchTerm: string = ''; // NEW: Search input
+  filteredEvents: any[] = []; 
+  
+  // --- FILTER STATE ---
+  searchTerm: string = ''; 
+  statusFilter: string = 'ALL';
+
+  // --- PAGINATION STATE ---
+  currentPage: number = 1;
+  itemsPerPage: number = 9; // Display in 3x3 grid format
+  totalPages: number = 0;
+  paginatedEvents: any[] = [];
 
   pollingInterval: any;
 
@@ -30,6 +39,7 @@ export class LiveTicketingComponent implements OnInit, OnDestroy {
 
     this.fetchLiveTickets();
 
+    // Auto-refresh every 5 seconds
     this.pollingInterval = setInterval(() => { 
       this.fetchLiveTickets(); 
     }, 5000);
@@ -46,24 +56,64 @@ export class LiveTicketingComponent implements OnInit, OnDestroy {
       (data: any[]) => { 
         if (data) {
           this.allEvents = data;
-          this.filterEvents(); // Automatically re-filters every time live data arrives
+          this.applyFilters(); // Re-apply current search/sort/page on new data
         }
       },
       (error) => console.error("Failed to fetch live tickets", error)
     );
   }
 
-  // --- NEW: Search filter logic ---
-  filterEvents(): void {
-    if (!this.searchTerm) {
-      this.filteredEvents = [...this.allEvents];
-    } else {
+  // --- FILTER LOGIC ---
+  applyFilters(): void {
+    let temp = [...this.allEvents];
+
+    // 1. Text Search Filter
+    if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-      this.filteredEvents = this.allEvents.filter(e => 
+      temp = temp.filter(e => 
         e.title?.toLowerCase().includes(term) ||
-        e.status?.toLowerCase().includes(term)
+        e.location?.toLowerCase().includes(term)
       );
     }
+
+    // 2. Status Dropdown Filter
+    if (this.statusFilter !== 'ALL') {
+      temp = temp.filter(e => e.status?.toUpperCase() === this.statusFilter);
+    }
+
+    this.filteredEvents = temp;
+    this.calculatePagination();
+  }
+
+  // --- PAGINATION LOGIC ---
+  calculatePagination(): void {
+    this.totalPages = Math.ceil(this.filteredEvents.length / this.itemsPerPage);
+    
+    // Prevent out-of-bounds page if filters reduce the total items
+    if (this.currentPage > this.totalPages && this.totalPages > 0) {
+      this.currentPage = this.totalPages;
+    }
+    if (this.currentPage < 1) {
+      this.currentPage = 1;
+    }
+    
+    this.updatePaginatedList();
+  }
+
+  updatePaginatedList(): void {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    this.paginatedEvents = this.filteredEvents.slice(start, start + this.itemsPerPage);
+  }
+
+  changePage(p: number): void { 
+    if (p >= 1 && p <= this.totalPages) { 
+      this.currentPage = p; 
+      this.updatePaginatedList(); 
+    } 
+  }
+  
+  getPagesArray(): number[] { 
+    return Array(this.totalPages).fill(0).map((x, i) => i + 1); 
   }
 
   getCapacityPercentage(booked: number, max: number): number {

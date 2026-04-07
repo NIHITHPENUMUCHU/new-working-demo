@@ -12,19 +12,30 @@
     </div>
   </div>
 
-  <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
-    <div style="position: relative; width: 100%; max-width: 400px;">
-      <svg style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #94a3b8;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="filterEvents()" placeholder="Search events by title or status..." style="width: 100%; padding: 12px 16px 12px 45px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif; font-size: 14px; outline: none; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+  <div class="controls-header">
+    <div class="filter-wrapper">
+      <label>Filter by Status</label>
+      <select [(ngModel)]="statusFilter" (ngModelChange)="applyFilters()">
+        <option value="ALL">All Events</option>
+        <option value="SCHEDULED">Scheduled (Standby)</option>
+        <option value="ONGOING">Ongoing (Live)</option>
+        <option value="COMPLETED">Completed</option>
+        <option value="CANCELLED">Cancelled / Aborted</option>
+      </select>
+    </div>
+
+    <div class="global-search-wrapper">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" placeholder="Search events by title or location...">
     </div>
   </div>
 
   <div class="ticket-hub-grid">
-    <div class="empty-state" *ngIf="filteredEvents.length === 0" style="padding: 40px; text-align: center; color: #94a3b8; font-style: italic; background: #fff; border-radius: 12px; border: 1px dashed #cbd5e1;">
-      No events match your search.
+    <div class="empty-state" *ngIf="filteredEvents.length === 0" style="padding: 40px; text-align: center; color: #94a3b8; font-style: italic; background: #fff; border-radius: 12px; border: 1px dashed #cbd5e1; grid-column: 1 / -1;">
+      No events match your current search and filter criteria.
     </div>
 
-    <div class="hub-card animate-slide-up" *ngFor="let ev of filteredEvents">
+    <div class="hub-card animate-slide-up" *ngFor="let ev of paginatedEvents">
       <div class="hub-header" [ngClass]="ev.status?.toLowerCase()">
         <h4>{{ ev.title }}</h4>
         <span>{{ ev.status }}</span>
@@ -63,5 +74,15 @@
 
       </div>
     </div>
+  </div>
+
+  <div class="pagination-container" *ngIf="totalPages > 1">
+    <button class="page-btn nav-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Prev</button>
+    <div class="page-numbers">
+      <button *ngFor="let p of getPagesArray()" class="page-btn" [class.active]="p === currentPage" (click)="changePage(p)">
+        {{ p }}
+      </button>
+    </div>
+    <button class="page-btn nav-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">Next</button>
   </div>
 </div>
