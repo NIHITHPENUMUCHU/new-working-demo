@@ -88,7 +88,7 @@ export class HttpService {
     return this.http.get(`${this.serverName}/api/staff/events/${username}`, { headers: this.getHeaders() });
   }
 
-  // --- CLIENT ENDPOINTS ---
+    // --- CLIENT ENDPOINTS ---
   getClientEventDetails(eventId: number): Observable<any> {
     return this.http.get(`${this.serverName}/api/client/event/${eventId}`, { headers: this.getHeaders() });
   }
@@ -99,6 +99,11 @@ export class HttpService {
   
   bookEventPass(eventId: number, quantity: number): Observable<any> {
     return this.http.post(`${this.serverName}/api/client/book/${eventId}/${quantity}`, {}, { headers: this.getHeaders() });
+  }
+
+  // --- NEW: CANCEL PASS ENDPOINT ---
+  cancelEventPass(eventId: number, quantity: number): Observable<any> {
+    return this.http.post(`${this.serverName}/api/client/cancel-booking/${eventId}/${quantity}`, {}, { headers: this.getHeaders() });
   }
 
   // --- NOTIFICATION ENGINE ---

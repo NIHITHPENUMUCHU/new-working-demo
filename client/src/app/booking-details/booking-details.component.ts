@@ -20,6 +20,10 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
   catalogSearchTerm: string = '';
   ticketSearchTerm: string = '';
 
+  activeBookingEventId: number | null = null;
+  showCancelModal: boolean = false;
+  ticketToCancel: any = null;
+
   private pollingInterval: any; 
 
   constructor(public router: Router, public httpService: HttpService) { }
@@ -59,7 +63,18 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
   syncTicketsWithDatabase(): void {
     if (!this.myTickets || this.myTickets.length === 0) return;
     let updated = false; let checksCompleted = 0;
+    
     this.myTickets.forEach((ticket, index) => {
+      // FIX 1: If the user manually cancelled this pass, NEVER overwrite it with the live event status!
+      if (ticket.status === 'CANCELLED' && ticket.userCancelled === true) {
+        checksCompleted++;
+        if (checksCompleted === this.myTickets.length && updated) {
+          this.myTickets = [...this.myTickets]; 
+          localStorage.setItem('myTickets_' + this.username, JSON.stringify(this.myTickets));
+        }
+        return; // Skip server sync for this specific ticket
+      }
+
       const eventId = ticket.eventID || ticket.id;
       this.httpService.getClientEventDetails(eventId).subscribe(
         (liveEvent: any) => {
@@ -78,6 +93,9 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
+  initiateBooking(eventId: any): void { this.activeBookingEventId = eventId; }
+  cancelBookingMode(): void { this.activeBookingEventId = null; }
+
   getQuantity(eventId: any): number { return this.ticketQuantities[eventId] || 1; }
   increment(eventId: any, maxLeft: number): void { let current = this.getQuantity(eventId); if (current < maxLeft && current < 10) { this.ticketQuantities[eventId] = current + 1; } }
   decrement(eventId: any): void { let current = this.getQuantity(eventId); if (current > 1) { this.ticketQuantities[eventId] = current - 1; } }
@@ -85,19 +103,52 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
   bookTicket(event: any): void {
     const eventId = event.eventID || event.id;
     const qty = this.getQuantity(eventId);
-    const newTicket = { ...event, uniqueTicketId: Date.now() + Math.floor(Math.random() * 1000), quantity: qty };
+    const newTicket = { ...event, uniqueTicketId: Date.now() + Math.floor(Math.random() * 1000), quantity: qty, userCancelled: false };
 
     this.httpService.bookEventPass(eventId, qty).subscribe(() => {
       this.myTickets.unshift(newTicket);
       localStorage.setItem('myTickets_' + this.username, JSON.stringify(this.myTickets));
+      this.activeBookingEventId = null; 
       this.activeTab = 'MY_TICKETS'; 
       this.syncTicketsWithDatabase();
       this.ticketQuantities[eventId] = 1;
     });
   }
 
+  openCancelModal(ticket: any): void {
+    this.ticketToCancel = ticket;
+    this.showCancelModal = true;
+  }
+
+  closeCancelModal(): void {
+    this.showCancelModal = false;
+    this.ticketToCancel = null;
+  }
+
+  confirmCancelTicket(): void {
+    if (!this.ticketToCancel) return;
+    const eventId = this.ticketToCancel.eventID || this.ticketToCancel.id;
+    const qty = this.ticketToCancel.quantity || 1;
+
+    this.httpService.cancelEventPass(eventId, qty).subscribe(() => {
+      const index = this.myTickets.findIndex(t => t.uniqueTicketId === this.ticketToCancel.uniqueTicketId);
+      if (index !== -1) {
+        // FIX 1: Lock the ticket into 'CANCELLED' state permanently using the userCancelled flag
+        this.myTickets[index].status = 'CANCELLED';
+        this.myTickets[index].userCancelled = true; 
+        localStorage.setItem('myTickets_' + this.username, JSON.stringify(this.myTickets));
+      }
+      this.fetchActiveEvents(); 
+      this.closeCancelModal();
+    }, error => {
+      console.error("Failed to cancel ticket", error);
+      this.closeCancelModal();
+    });
+  }
+
   switchTab(tab: string): void { 
     this.activeTab = tab; 
+    this.activeBookingEventId = null; 
     if (tab === 'MY_TICKETS') this.syncTicketsWithDatabase();
     else if (tab === 'CATALOG') this.fetchActiveEvents();
   }

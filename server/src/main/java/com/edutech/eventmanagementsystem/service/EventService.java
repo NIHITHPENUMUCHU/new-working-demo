@@ -23,7 +23,6 @@ public class EventService {
     @Autowired private ResourceRepository resourceRepository;
     @Autowired private AllocationRepository allocationRepository;
 
-    // Fetch visibility-filtered events
     public List<Event> getEventsForStaff(String username) {
         return eventRepository.findEventsForStaff(username);
     }
@@ -40,23 +39,51 @@ public class EventService {
         try {
             Notification notif = new Notification();
             notif.setMessage("Planner '" + plannerName + "' drafted event #" + savedEvent.getId() + ": " + savedEvent.getTitle());
-            
-            // --- SMART NOTIFICATION ROUTING ---
             String assignee = savedEvent.getAssignedStaffUsername();
             if (assignee != null && !assignee.trim().isEmpty() && !assignee.equalsIgnoreCase("PUBLIC")) {
-                notif.setTargetRole("STAFF_" + assignee); // Direct Message to specific staff
+                notif.setTargetRole("STAFF_" + assignee); 
             } else {
-                notif.setTargetRole("STAFF"); // Global Broadcast to all staff
+                notif.setTargetRole("STAFF"); 
             }
             notificationRepository.save(notif);
         } catch (Exception e) { e.printStackTrace(); }
-        
         return savedEvent;
     }
 
     public List<Event> getAllEvents() { return eventRepository.findAll(); }
-    
     public Event getEventById(Long id) { return eventRepository.findById(id).orElseThrow(() -> new RuntimeException("Event not found")); }
+
+    // --- CLIENT BOOKING ENGINE ---
+    public void bookEventPass(Long eventId, Integer quantity, String username) {
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
+        if (event.getBookedCount() == null) event.setBookedCount(0);
+        event.setBookedCount(event.getBookedCount() + quantity);
+        eventRepository.save(event);
+    }
+
+    // --- NEW: CLIENT CANCELLATION ENGINE ---
+    public void cancelEventPass(Long eventId, Integer quantity, String username) {
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new RuntimeException("Event not found"));
+        if (event.getBookedCount() == null) event.setBookedCount(0);
+        
+        // Safely restore capacity
+        event.setBookedCount(Math.max(0, event.getBookedCount() - quantity));
+        eventRepository.save(event);
+
+        try {
+            // Instantly notify the Planner that seats have opened up!
+            Notification notif = new Notification();
+            String plannerName = event.getPlannerUsername();
+            notif.setMessage("TICKET ALERT: Client '" + username + "' cancelled " + quantity + " pass(es) for Event #" + event.getId() + " (" + event.getTitle() + "). Capacity has been successfully restored.");
+            
+            if (plannerName != null && !plannerName.isEmpty()) {
+                notif.setTargetRole("PLANNER_" + plannerName);
+            } else {
+                notif.setTargetRole("PLANNER");
+            }
+            notificationRepository.save(notif);
+        } catch (Exception e) { e.printStackTrace(); }
+    }
 
     public Event updateEvent(Long id, Event eventDetails) {
         Event event = eventRepository.findById(id).orElseThrow(() -> new RuntimeException("Event not found"));
@@ -108,7 +135,6 @@ public class EventService {
     public Event cancelEvent(Long id) {
         Event event = eventRepository.findById(id).orElseThrow(() -> new RuntimeException("Event not found"));
         String oldStatus = event.getStatus();
-        
         event.setStatus("CANCELLED");
         Event updatedEvent = eventRepository.save(event);
 

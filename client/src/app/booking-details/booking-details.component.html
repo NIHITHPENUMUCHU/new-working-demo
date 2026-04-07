@@ -1,11 +1,25 @@
-<div class="page-wrapper animate-slide-up">
-
-  <div class="custom-loader-overlay fixed-overlay" *ngIf="isPrinting">
-    <div class="animated-brand-logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 22 12 17 22 22 12 2" class="brand-poly"></polygon><circle cx="12" cy="12" r="2" class="brand-dot"></circle></svg>
+<div class="custom-modal-overlay" *ngIf="showCancelModal">
+  <div class="custom-modal-content animate-slide-up">
+    <div class="modal-icon-danger">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
     </div>
-    <p class="loader-text">Generating Secure High-Res PDF...</p>
+    <h3>Cancel Digital Pass</h3>
+    <p>Are you sure you want to cancel and return this entry pass? <strong>This action cannot be undone</strong>, and your QR code will be permanently invalidated.</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="closeCancelModal()">Go Back</button>
+      <button class="btn-danger" (click)="confirmCancelTicket()">Yes, Cancel Pass</button>
+    </div>
   </div>
+</div>
+
+<div class="custom-loader-overlay fixed-overlay" *ngIf="isPrinting">
+  <div class="animated-brand-logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 22 12 17 22 22 12 2" class="brand-poly"></polygon><circle cx="12" cy="12" r="2" class="brand-dot"></circle></svg>
+  </div>
+  <p class="loader-text">Generating Secure High-Res PDF...</p>
+</div>
+
+<div class="page-wrapper animate-slide-up">
 
   <div class="page-header">
     <div class="header-icon orange-bg">
@@ -49,12 +63,24 @@
         
         <div class="card-footer">
           <div class="booking-controls" *ngIf="ev.bookedCount < ev.maxCapacity">
-            <div class="quantity-stepper">
-              <button class="stepper-btn" (click)="decrement(ev.eventID || ev.id)">-</button>
-              <span class="stepper-value">{{ getQuantity(ev.eventID || ev.id) }}</span>
-              <button class="stepper-btn" (click)="increment(ev.eventID || ev.id, ev.maxCapacity - (ev.bookedCount || 0))">+</button>
+            
+            <button class="btn-book full-btn" *ngIf="activeBookingEventId !== (ev.eventID || ev.id)" (click)="initiateBooking(ev.eventID || ev.id)">Book Event</button>
+
+            <div class="stepper-mode animate-slide-up" *ngIf="activeBookingEventId === (ev.eventID || ev.id)">
+              <div class="stepper-row">
+                <span class="select-text">Select Quantity:</span>
+                <div class="quantity-stepper">
+                  <button class="stepper-btn" (click)="decrement(ev.eventID || ev.id)">-</button>
+                  <span class="stepper-value">{{ getQuantity(ev.eventID || ev.id) }}</span>
+                  <button class="stepper-btn" (click)="increment(ev.eventID || ev.id, ev.maxCapacity - (ev.bookedCount || 0))">+</button>
+                </div>
+              </div>
+              <div class="stepper-actions">
+                <button class="btn-cancel-stepper" (click)="cancelBookingMode()">Cancel</button>
+                <button class="btn-confirm-stepper" (click)="bookTicket(ev)">Secure Passes</button>
+              </div>
             </div>
-            <button class="btn-book" (click)="bookTicket(ev)">Secure {{ getQuantity(ev.eventID || ev.id) }} Pass<span *ngIf="getQuantity(ev.eventID || ev.id) > 1">es</span></button>
+
           </div>
           <button class="btn-book full-btn" *ngIf="ev.bookedCount >= ev.maxCapacity" disabled>Event Full</button>
         </div>
@@ -83,10 +109,18 @@
 
           <div class="ticket-top">
             <div class="event-title"><h3>{{ item.title }}</h3><span class="status-badge" [ngClass]="item.status?.toLowerCase()">{{ item.status }}</span></div>
-            <button class="btn-download-pdf no-print" *ngIf="item.status?.toUpperCase() !== 'COMPLETED' && item.status?.toUpperCase() !== 'CANCELLED'" (click)="printTicket(item)" [disabled]="isPrinting">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              {{ isPrinting && printingTicketId === (item.eventID || item.id || item.uniqueTicketId) ? 'Preparing...' : 'Save as PDF' }}
-            </button>
+            
+            <div class="ticket-top-actions no-print">
+              <button class="btn-cancel-pass" *ngIf="item.status?.toUpperCase() !== 'COMPLETED' && item.status?.toUpperCase() !== 'CANCELLED'" (click)="openCancelModal(item)" [disabled]="isPrinting">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                Cancel Pass
+              </button>
+
+              <button class="btn-download-pdf" *ngIf="item.status?.toUpperCase() !== 'COMPLETED' && item.status?.toUpperCase() !== 'CANCELLED'" (click)="printTicket(item)" [disabled]="isPrinting">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                {{ isPrinting && printingTicketId === (item.eventID || item.id || item.uniqueTicketId) ? 'Preparing...' : 'PDF' }}
+              </button>
+            </div>
           </div>
 
           <div class="ticket-details">
