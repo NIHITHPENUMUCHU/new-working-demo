@@ -10,6 +10,9 @@ import { Router } from '@angular/router';
 })
 export class LiveTicketingComponent implements OnInit, OnDestroy {
   allEvents: any[] = [];
+  filteredEvents: any[] = []; // NEW: For search tracking
+  searchTerm: string = ''; // NEW: Search input
+
   pollingInterval: any;
 
   constructor(
@@ -19,7 +22,6 @@ export class LiveTicketingComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Security Check: Only Planners can view this page
     const role = this.authService.getRole();
     if (!this.authService.getLoginStatus() || role?.toUpperCase() !== 'PLANNER') {
       this.router.navigate(['/dashboard']);
@@ -28,7 +30,6 @@ export class LiveTicketingComponent implements OnInit, OnDestroy {
 
     this.fetchLiveTickets();
 
-    // Poll the database every 5 seconds for live capacity updates
     this.pollingInterval = setInterval(() => { 
       this.fetchLiveTickets(); 
     }, 5000);
@@ -44,12 +45,25 @@ export class LiveTicketingComponent implements OnInit, OnDestroy {
     this.httpService.GetAllevents().subscribe(
       (data: any[]) => { 
         if (data) {
-          // Sort so that newer or ongoing events show first, but keep it simple for now
           this.allEvents = data;
+          this.filterEvents(); // Automatically re-filters every time live data arrives
         }
       },
       (error) => console.error("Failed to fetch live tickets", error)
     );
+  }
+
+  // --- NEW: Search filter logic ---
+  filterEvents(): void {
+    if (!this.searchTerm) {
+      this.filteredEvents = [...this.allEvents];
+    } else {
+      const term = this.searchTerm.toLowerCase();
+      this.filteredEvents = this.allEvents.filter(e => 
+        e.title?.toLowerCase().includes(term) ||
+        e.status?.toLowerCase().includes(term)
+      );
+    }
   }
 
   getCapacityPercentage(booked: number, max: number): number {

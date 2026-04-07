@@ -51,7 +51,15 @@
     </div>
 
     <div class="enterprise-card table-card">
-      <h3>Global Inventory List</h3>
+      
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 15px; margin-bottom: 15px;">
+        <h3 style="margin: 0;">Global Inventory List</h3>
+        <div style="position: relative; width: 100%; max-width: 350px;">
+          <svg style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #94a3b8;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="filterResources()" placeholder="Search inventory by name or category..." style="width: 100%; padding: 12px 16px 12px 45px; border-radius: 8px; border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif; font-size: 14px; outline: none;">
+        </div>
+      </div>
+
       <div class="table-responsive">
         <table class="data-table">
           <thead>
@@ -75,8 +83,8 @@
                 </span>
               </td>
             </tr>
-            <tr *ngIf="resourceList.length === 0">
-              <td colspan="5" class="empty-state">No resources in inventory.</td>
+            <tr *ngIf="filteredResourceList.length === 0">
+              <td colspan="5" class="empty-state" style="text-align: center; padding: 40px; color: #94a3b8; font-style: italic;">No resources match your search.</td>
             </tr>
           </tbody>
         </table>
