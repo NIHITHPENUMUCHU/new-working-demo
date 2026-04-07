@@ -23,7 +23,11 @@ export class DashbaordComponent implements OnInit, OnDestroy {
   // LIVE MONITOR & LEDGER ARRAYS
   activeEvents: any[] = [];
   rawEventData: any[] = []; 
-  recentEvents: any[] = []; // <-- NEW: Array for the dashboard ledger table
+  recentEvents: any[] = []; 
+
+  // CAROUSEL LOGIC FOR LIVE MONITOR
+  monitorStartIndex: number = 0;
+  monitorDisplayCount: number = 3; 
 
   staffEventCount: number = 0;
   clientPassCount: number = 0;
@@ -39,10 +43,18 @@ export class DashbaordComponent implements OnInit, OnDestroy {
 
   private pollingInterval: any;
 
-  constructor(private authService: AuthService, private router: Router, private httpService: HttpService) {}
+  constructor(
+    private authService: AuthService, 
+    private router: Router, 
+    private httpService: HttpService
+  ) {}
 
   ngOnInit(): void {
-    if (!this.authService.getLoginStatus()) { this.router.navigate(['/login']); return; }
+    if (!this.authService.getLoginStatus()) { 
+      this.router.navigate(['/login']); 
+      return; 
+    }
+    
     this.setGreeting();
     const rawRole = this.authService.getRole();
     this.roleName = rawRole ? rawRole.toUpperCase() : null;
@@ -65,7 +77,9 @@ export class DashbaordComponent implements OnInit, OnDestroy {
       this.pollingInterval = setInterval(() => { this.fetchLiveMetrics(); }, 5000);
     } 
     else if (this.roleName === 'STAFF') {
-      this.httpService.getStaffEvents(rawUsernameForKeys).subscribe((data: any[]) => { if (data) this.staffEventCount = data.length; });
+      this.httpService.getStaffEvents(rawUsernameForKeys).subscribe((data: any[]) => { 
+        if (data) this.staffEventCount = data.length; 
+      });
     }
     else if (this.roleName === 'CLIENT') {
       const tickets = localStorage.getItem('myTickets_' + rawUsernameForKeys);
@@ -73,7 +87,9 @@ export class DashbaordComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void { if (this.pollingInterval) clearInterval(this.pollingInterval); }
+  ngOnDestroy(): void { 
+    if (this.pollingInterval) clearInterval(this.pollingInterval); 
+  }
 
   setGreeting(): void {
     const hour = new Date().getHours();
@@ -84,13 +100,17 @@ export class DashbaordComponent implements OnInit, OnDestroy {
     this.httpService.GetAllevents().subscribe((data: any[]) => { 
         if (data) {
           this.rawEventData = data; 
-          this.totalEvents = data.length;
-          this.scheduledEvents = data.filter(e => e.status?.toUpperCase() === 'SCHEDULED').length;
-          this.ongoingEvents = data.filter(e => e.status?.toUpperCase() === 'ONGOING').length;
-          this.completedEvents = data.filter(e => e.status?.toUpperCase() === 'COMPLETED').length;
+          
+          const currentUsername = localStorage.getItem('username');
+          // STRICT FILTER: Only show events created by the logged-in Planner
+          const myEvents = data.filter(e => e.plannerUsername === currentUsername);
 
-          // Process Top 4 events for Capacity Monitor
-          this.activeEvents = data
+          this.totalEvents = myEvents.length;
+          this.scheduledEvents = myEvents.filter(e => e.status?.toUpperCase() === 'SCHEDULED').length;
+          this.ongoingEvents = myEvents.filter(e => e.status?.toUpperCase() === 'ONGOING').length;
+          this.completedEvents = myEvents.filter(e => e.status?.toUpperCase() === 'COMPLETED').length;
+
+          this.activeEvents = myEvents
             .filter(e => e.status?.toUpperCase() === 'SCHEDULED' || e.status?.toUpperCase() === 'ONGOING')
             .map(e => {
               const booked = Number(e.bookedCount) || 0;
@@ -100,11 +120,9 @@ export class DashbaordComponent implements OnInit, OnDestroy {
               if (fillPercentage < 0) fillPercentage = 0;
               return { ...e, fillPercentage, safeBooked: booked, safeMax: max };
             })
-            .sort((a, b) => b.fillPercentage - a.fillPercentage) 
-            .slice(0, 4);
+            .sort((a, b) => b.fillPercentage - a.fillPercentage);
 
-          // NEW: Grab the 5 most recently created events for the Ledger Table
-          this.recentEvents = [...data].sort((a, b) => {
+          this.recentEvents = [...myEvents].sort((a, b) => {
             const idA = a.eventID || a.id || 0;
             const idB = b.eventID || b.id || 0;
             return idB - idA; // Sort highest ID (newest) first
@@ -137,18 +155,79 @@ export class DashbaordComponent implements OnInit, OnDestroy {
     });
   }
 
+  // --- CAROUSEL NAVIGATION LOGIC ---
+  get visibleMonitorEvents() {
+    return this.activeEvents.slice(this.monitorStartIndex, this.monitorStartIndex + this.monitorDisplayCount);
+  }
+
+  nextMonitorEvent(): void {
+    if (this.monitorStartIndex + this.monitorDisplayCount < this.activeEvents.length) {
+      this.monitorStartIndex++;
+    }
+  }
+
+  prevMonitorEvent(): void {
+    if (this.monitorStartIndex > 0) {
+      this.monitorStartIndex--;
+    }
+  }
+
+  // --- PERFECTED CSV EXPORT LOGIC ---
   exportToCSV(): void {
-    if (!this.rawEventData || this.rawEventData.length === 0) return;
-    let csvContent = "Event ID,Title,Date,Location,Status,Tickets Sold,Max Capacity,Assigned Staff\n";
-    this.rawEventData.forEach(ev => {
-      const dateStr = ev.dateTime ? new Date(ev.dateTime).toLocaleDateString() : 'TBD';
-      csvContent += `${ev.id || ev.eventID},"${ev.title}","${dateStr}","${ev.location}","${ev.status}",${ev.bookedCount || 0},${ev.maxCapacity},"${ev.assignedStaffUsername || 'Public'}"\n`;
+    const currentUsername = localStorage.getItem('username');
+    
+    // 1. Strictly filter to only the logged-in Planner's events
+    const myEvents = this.rawEventData.filter(e => e.plannerUsername === currentUsername);
+
+    if (!myEvents || myEvents.length === 0) {
+      alert("No events found to export.");
+      return;
+    }
+
+    // 2. Safe Escape Function: Wraps data in quotes to prevent commas/newlines from breaking the Excel layout
+    const escapeCSV = (str: any) => {
+      if (str === null || str === undefined) return '""';
+      const stringVal = String(str);
+      return `"${stringVal.replace(/"/g, '""')}"`; 
+    };
+
+    // 3. Define the precise requested headers
+    let csvContent = "Event Name,Description,Date,Max Attendee,Lead Staff,Location\n";
+
+    // 4. Map the data row by row
+    myEvents.forEach(ev => {
+      const name = escapeCSV(ev.title);
+      const description = escapeCSV(ev.description || 'No description provided');
+      
+      // FIX: Formatted Date to prevent Excel ##### error
+      let dateStr = '"TBD"';
+      if (ev.dateTime) {
+        const d = new Date(ev.dateTime);
+        // Formats as "Apr 08, 2026" which Excel reads beautifully without squishing
+        const formattedDate = d.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: '2-digit' 
+        });
+        dateStr = escapeCSV(formattedDate);
+      }
+
+      const capacity = escapeCSV(ev.maxCapacity);
+      const staff = escapeCSV(ev.assignedStaffUsername ? ev.assignedStaffUsername : 'Public');
+      const location = escapeCSV(ev.location);
+
+      csvContent += `${name},${description},${dateStr},${capacity},${staff},${location}\n`;
     });
+
+    // 5. Trigger the secure download
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", "EventMaster_MasterReport.csv");
+    
+    // Append a timestamp so planners can download multiple reports without overwriting files locally
+    const timestamp = new Date().getTime();
+    link.setAttribute("download", `My_Events_Export_${timestamp}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();

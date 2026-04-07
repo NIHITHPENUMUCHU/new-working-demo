@@ -1,39 +1,40 @@
-<div class="custom-palette-dashboard animate-slide-up">
+<div class="page-wrapper animate-slide-up">
 
-  <header class="hero-banner">
+  <header class="dash-header hero-banner">
     <div class="hero-content">
-      <div class="role-badge">{{ roleName }}</div>
+      <div class="role-pill">{{ roleName }}</div>
       
       <h1>
-        <span class="greeting-text">{{ greeting }},  </span>
+        <span class="greeting-text">{{ greeting }},&nbsp;</span>
         <span class="highlight-name">{{ username }}</span>
       </h1>
+      <p style="color: #cbd5e1; margin-bottom: 20px;">Here is your personalized real-time operational overview.</p>
       
       <div class="system-status-bar">
         <div class="status-item">
-          <div class="status-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <div class="status-icon pulse-bg-teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           </div>
           <div class="status-text">
-            <small>Current System Date</small>
-            <strong>{{ currentDate | date:'fullDate' }}</strong>
+            <small>System Date</small>
+            <strong>{{ currentDate | date:'mediumDate' }}</strong>
           </div>
         </div>
 
         <div class="status-divider"></div>
 
         <div class="status-item">
-          <div class="status-icon orange-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <div class="status-icon orange-icon pulse-bg-orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
           </div>
           <div class="status-text">
-            <small>Last LogIn</small>
-            <strong>{{ lastLogin | date:'MMM d, y, h:mm a' }}</strong>
+            <small>Last Login</small>
+            <strong>{{ lastLogin | date:'shortTime' }}</strong>
           </div>
         </div>
       </div>
     </div>
-    
+
     <div class="hero-shapes">
       <div class="shape teal-circle"></div>
       <div class="shape orange-square"></div>
@@ -41,243 +42,163 @@
   </header>
 
   <ng-container *ngIf="roleName === 'PLANNER'">
-    <h3 class="section-title">Operations Metrics</h3>
-    <div class="metrics-container">
-      <div class="metric-card navy-accent">
-        <div class="custom-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+    <div class="bento-grid">
+      
+      <div class="bento-card monitor-bento">
+        <div class="bento-header monitor-header-flex">
+          <div>
+            <h2>Live Capacity Monitor <span class="live-pulse orange-pulse"></span></h2>
+            <p>Real-time telemetry tracking for your active operations.</p>
+          </div>
+          <div class="monitor-nav" *ngIf="activeEvents.length > monitorDisplayCount">
+            <button class="nav-btn" [disabled]="monitorStartIndex === 0" (click)="prevMonitorEvent()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+            <button class="nav-btn" [disabled]="monitorStartIndex + monitorDisplayCount >= activeEvents.length" (click)="nextMonitorEvent()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+          </div>
         </div>
-        <div class="metric-text">
-          <h2>{{ totalEvents }}</h2>
-          <span>Total Drafted Events</span>
-        </div>
-      </div>
 
-      <div class="metric-card teal-accent">
-        <div class="custom-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-        </div>
-        <div class="metric-text">
-          <h2>{{ scheduledEvents }}</h2>
-          <span>Scheduled / Awaiting</span>
-        </div>
-      </div>
-
-      <div class="metric-card orange-accent">
-        <div class="custom-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-        </div>
-        <div class="metric-text">
-          <h2>{{ ongoingEvents }}</h2>
-          <span>Live / Ongoing</span>
-        </div>
-      </div>
-
-      <div class="metric-card navy-accent">
-        <div class="custom-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-        </div>
-        <div class="metric-text">
-          <h2>{{ completedEvents }}</h2>
-          <span>Successfully Completed</span>
-        </div>
-      </div>
-    </div>
-
-    <h3 class="section-title">Inventory & Asset Tracking</h3>
-    <div class="metrics-container">
-      <div class="metric-card teal-accent">
-        <div class="custom-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-        </div>
-        <div class="metric-text full-width-metric">
-          <h2>{{ availableResources }}<small>/{{ totalResources }}</small></h2>
-          <span>Available Master Assets</span>
-          <div class="utilization-wrapper">
-            <div class="progress-bg">
-              <div class="progress-fill" [style.width.%]="resourceUtilization"></div>
+        <div class="live-monitor-grid">
+          <div class="monitor-card" *ngFor="let ev of visibleMonitorEvents">
+            <div class="monitor-header">
+              <h4>{{ ev.title }}</h4>
+              <span class="status-badge" [ngClass]="ev.status?.toLowerCase()">{{ ev.status }}</span>
             </div>
-            <small class="utilization-label">{{ resourceUtilization }}% of inventory currently deployed</small>
+            <div class="monitor-stats">
+              <span>{{ ev.safeBooked }} / {{ ev.safeMax }} Seats</span>
+              <strong>{{ ev.fillPercentage }}% Filled</strong>
+            </div>
+            <div class="progress-bg">
+              <div class="progress-fill" 
+                   [style.width.%]="ev.fillPercentage"
+                   [ngClass]="{'danger-fill': ev.fillPercentage >= 90, 'warning-fill': ev.fillPercentage >= 60 && ev.fillPercentage < 90, 'safe-fill': ev.fillPercentage < 60}">
+              </div>
+            </div>
+          </div>
+          <div *ngIf="activeEvents.length === 0" class="empty-state" style="grid-column: 1 / -1;">
+            You have no live events to monitor.
           </div>
         </div>
       </div>
 
-      <div class="metric-card orange-accent">
-        <div class="custom-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+      <div class="bento-card inventory-bento small-inventory gradient-bg">
+        <div class="bento-header"><h2>Asset Sync</h2></div>
+        <div class="inv-stats-small">
+          <div class="stat-block"><h3>{{ availableResources }}</h3><p>Available</p></div>
+          <div class="stat-block"><h3>{{ activeAllocations }}</h3><p>Deployed</p></div>
         </div>
-        <div class="metric-text">
-          <h2>{{ activeAllocations }}</h2>
-          <span>Currently Deployed</span>
-          <small style="color: var(--c-teal); font-weight: 700; margin-top: 5px; display: block;">+ {{ itemsReturned }} Returned Safely</small>
+        <div class="util-bar">
+          <div class="util-labels"><span>Utilization</span><span>{{ resourceUtilization }}%</span></div>
+          <div class="util-bg"><div class="util-fill" [style.width.%]="resourceUtilization"></div></div>
         </div>
       </div>
-    </div>
 
-    <h3 class="section-title">Live Capacity Monitor <span class="live-pulse"></span></h3>
-    <div class="live-monitor-grid">
-      <div class="monitor-card" *ngFor="let ev of activeEvents">
-        <div class="monitor-header">
-          <h4>{{ ev.title }}</h4>
-          <span class="status-badge" [ngClass]="ev.status?.toLowerCase()">{{ ev.status }}</span>
+      <div class="bento-card ledger-bento">
+        <div class="bento-header">
+          <div>
+            <h2>My Drafted Events</h2>
+            <p>Your latest entries in the global registry.</p>
+          </div>
+          <button class="btn-ghost" routerLink="/create-event">View All &rarr;</button>
         </div>
-        <div class="monitor-stats">
-          <span>{{ ev.safeBooked }} / {{ ev.safeMax }} Seats</span>
-          <strong>{{ ev.fillPercentage }}% Filled</strong>
+        
+        <div class="table-responsive">
+          <table class="bento-table">
+            <thead><tr><th>Event</th><th>Date & Loc</th><th>Status</th><th>Capacity</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let ev of recentEvents">
+                <td><span class="id-tag">#{{ ev.eventID || ev.id }}</span> <strong>{{ ev.title }}</strong></td>
+                <td><span class="date-text">{{ ev.dateTime | date:'MMM d' }}</span> <span class="loc-text">{{ ev.location }}</span></td>
+                <td><span class="status-badge" [ngClass]="ev.status?.toLowerCase()">{{ ev.status }}</span></td>
+                <td>
+                  <div class="mini-prog-wrap">
+                    <div class="mini-nums">{{ ev.bookedCount || 0 }}/{{ ev.maxCapacity || 1 }}</div>
+                    <div class="mini-bg"><div class="mini-fill" [style.width.%]="ev.maxCapacity ? (((ev.bookedCount || 0) / ev.maxCapacity) * 100) : 0" [ngStyle]="{'background': (ev.bookedCount || 0) >= (ev.maxCapacity || 1) ? 'var(--c-orange)' : 'var(--c-teal)'}"></div></div>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="recentEvents.length === 0"><td colspan="4" class="empty-state">You haven't drafted any events yet.</td></tr>
+            </tbody>
+          </table>
         </div>
-        <div class="progress-bg">
-          <div class="progress-fill" 
-               [style.width.%]="ev.fillPercentage"
-               [ngClass]="{'danger-fill': ev.fillPercentage >= 90, 'warning-fill': ev.fillPercentage >= 60 && ev.fillPercentage < 90, 'safe-fill': ev.fillPercentage < 60}">
+      </div>
+
+      <div class="kpi-bento-group">
+        <div class="bento-card mini-kpi-card">
+          <div class="kpi-icon navy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect></svg></div>
+          <div class="kpi-info"><p>Total</p><h3>{{ totalEvents }}</h3></div>
+          <div class="card-accent navy"></div>
+        </div>
+
+        <div class="bento-card mini-kpi-card">
+          <div class="kpi-icon teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg></div>
+          <div class="kpi-info"><p>Scheduled</p><h3>{{ scheduledEvents }}</h3></div>
+          <div class="card-accent teal"></div>
+        </div>
+
+        <div class="bento-card mini-kpi-card">
+          <div class="kpi-icon orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
+          <div class="kpi-info"><p>Ongoing</p><h3>{{ ongoingEvents }}</h3></div>
+          <div class="card-accent orange"></div>
+        </div>
+
+        <div class="bento-card mini-kpi-card">
+          <div class="kpi-icon navy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
+          <div class="kpi-info"><p>Completed</p><h3>{{ completedEvents }}</h3></div>
+          <div class="card-accent navy"></div>
+        </div>
+      </div>
+
+      <div class="bento-card actions-bento full-width-bento">
+        <div class="bento-header">
+          <h2>Quick Actions</h2>
+          <button class="btn-ghost" (click)="exportToCSV()">Export My Events CSV</button>
+        </div>
+        <div class="action-grid">
+          <div class="action-box" routerLink="/create-event">
+            <div class="box-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></div>
+            <h4>Draft Event</h4>
+          </div>
+          <div class="action-box" routerLink="/add-resource">
+            <div class="box-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div>
+            <h4>Add Asset</h4>
+          </div>
+          <div class="action-box" routerLink="/resource-allocate">
+            <div class="box-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></div>
+            <h4>Allocate Route</h4>
           </div>
         </div>
       </div>
-      <div *ngIf="activeEvents.length === 0" class="empty-monitor">
-         No active events to monitor.
-      </div>
-    </div>
 
-    <div class="enterprise-card table-card" style="margin-top: 30px; margin-bottom: 40px; padding: 0; overflow: hidden; border-radius: 16px; background: #fff; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05); border: 1px solid #e2e8f0;">
-      <div class="table-header-flex" style="padding: 25px 25px 0 25px; display: flex; justify-content: space-between; align-items: flex-end;">
-        <div>
-          <h3 class="section-title" style="margin: 0; font-size: 1.4rem;">Recently Drafted Events</h3>
-          <p style="margin: 5px 0 0 0; color: #64748b; font-size: 0.95rem;">Review your latest entries in the global registry.</p>
-        </div>
-        <button class="palette-btn navy-btn" routerLink="/create-event" style="padding: 10px 20px; font-size: 0.9rem;">
-          View Full Registry &rarr;
-        </button>
-      </div>
-
-      <div class="table-responsive" style="margin-top: 20px; width: 100%; overflow-x: auto;">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Event Title</th>
-              <th>Date & Location</th>
-              <th>Status</th>
-              <th>Capacity</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let ev of recentEvents">
-              <td class="id-col">#{{ ev.eventID || ev.id }}</td>
-              <td class="fw-bold">{{ ev.title }}</td>
-              <td>
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                  <span style="color: var(--c-navy); font-weight: 600;">{{ ev.dateTime | date:'mediumDate' }}</span>
-                  <span style="color: #64748b; font-size: 12px;">{{ ev.location }}</span>
-                </div>
-              </td>
-              <td><span class="status-badge" [ngClass]="ev.status?.toLowerCase()">{{ ev.status }}</span></td>
-              <td>
-                <div class="mini-progress-wrapper" title="{{ ev.bookedCount || 0 }} / {{ ev.maxCapacity || 1 }} Seats">
-                  <div class="mini-stats">
-                    <span>{{ ev.bookedCount || 0 }}/{{ ev.maxCapacity || 1 }}</span>
-                  </div>
-                  <div class="mini-progress-bg">
-                    <div class="mini-progress-fill" 
-                         [style.width.%]="ev.maxCapacity ? (((ev.bookedCount || 0) / ev.maxCapacity) * 100) : 0" 
-                         [ngStyle]="{'background': (ev.bookedCount || 0) >= (ev.maxCapacity || 1) ? 'var(--c-orange)' : 'var(--c-teal)'}">
-                    </div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-            <tr *ngIf="recentEvents.length === 0">
-              <td colspan="5" class="empty-state" style="text-align: center; padding: 40px; color: #94a3b8; font-style: italic;">No events have been drafted yet.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
-      <h3 class="section-title" style="margin-bottom: 0;">Quick Actions</h3>
-      <button class="palette-btn navy-btn" (click)="exportToCSV()" style="padding: 10px 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
-        Export Master CSV
-      </button>
-    </div>
-
-    <div class="actions-grid">
-      <div class="action-card" routerLink="/create-event">
-        <div class="card-indicator"></div>
-        <h4>Draft Event</h4>
-        <p>Schedule and configure a new event.</p>
-        <span class="arrow-btn">→</span>
-      </div>
-      <div class="action-card" routerLink="/add-resource">
-        <div class="card-indicator"></div>
-        <h4>Add Inventory</h4>
-        <p>Register new equipment or personnel.</p>
-        <span class="arrow-btn">→</span>
-      </div>
-      <div class="action-card" routerLink="/resource-allocate">
-        <div class="card-indicator"></div>
-        <h4>Allocate</h4>
-        <p>Assign available resources to events.</p>
-        <span class="arrow-btn">→</span>
-      </div>
     </div>
   </ng-container>
 
   <ng-container *ngIf="roleName === 'STAFF'">
-    <div class="focused-workspace">
-      <div class="action-card large-card" routerLink="/view-events">
-        <div class="dynamic-badge teal" *ngIf="staffEventCount > 0">
-          <span class="pulse-dot"></span>
-          {{ staffEventCount }} Event<span *ngIf="staffEventCount > 1">s</span> Assigned To You
-        </div>
-        <div class="custom-icon teal-fill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-        </div>
-        <h3>Event Operations & Setup</h3>
-        <p>View your assigned events, track allocated resources, and update live operational statuses.</p>
-        <button class="palette-btn">Initialize Operations</button>
-      </div>
+    <div class="bento-card huge-action-card" routerLink="/view-events">
+      <div class="card-accent teal"></div>
+      <div class="huge-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>
+      <h2>Event Operations Setup</h2>
+      <p>You have <strong>{{ staffEventCount }}</strong> assigned operations awaiting your review.</p>
+      <button class="btn-primary">Access Operations Center</button>
     </div>
   </ng-container>
 
   <ng-container *ngIf="roleName === 'CLIENT'">
-    <div class="focused-workspace client-layout">
-      <div class="action-card large-card" routerLink="/booking-details">
-        <div class="dynamic-badge orange" *ngIf="clientPassCount > 0">
-          <span class="pulse-dot orange-pulse"></span>
-          {{ clientPassCount }} Active Pass<span *ngIf="clientPassCount > 1">es</span> Secured
-        </div>
-        <div class="custom-icon orange-fill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-            <path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path>
-            <path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path>
-          </svg>
-        </div>
-        <h3>Event Catalog & Digital Wallet</h3>
-        <p>Browse active events, secure your entry passes, and download high-resolution PDF tickets.</p>
-        <button class="palette-btn orange-btn">Open Client Portal</button>
+    <div class="bento-grid client-grid">
+      <div class="bento-card huge-action-card" routerLink="/booking-details">
+        <div class="card-accent orange"></div>
+        <div class="huge-icon orange-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
+        <h2>Event Catalog & Wallet</h2>
+        <p>You have <strong>{{ clientPassCount }}</strong> active digital passes in your wallet.</p>
+        <button class="btn-primary orange-btn">Open Digital Portal</button>
       </div>
 
-      <div class="faq-container">
-        <h3>Client Guide & FAQs</h3>
+      <div class="bento-card faq-bento">
+        <div class="bento-header"><h2>Client Guides</h2></div>
         <div class="accordion">
-          <div class="accordion-item" *ngFor="let faq of faqs; let i = index" [class.open]="activeFaqIndex === i">
-            <div class="accordion-header" (click)="toggleFaqItem(i)">
-              <h4>{{ faq.question }}</h4>
-              <span class="icon">{{ activeFaqIndex === i ? '−' : '+' }}</span>
+          <div class="acc-item" *ngFor="let faq of faqs; let i = index" [class.open]="activeFaqIndex === i">
+            <div class="acc-head" (click)="toggleFaqItem(i)">
+              <h4>{{ faq.question }}</h4><span>{{ activeFaqIndex === i ? '−' : '+' }}</span>
             </div>
-            <div class="accordion-content" [class.show]="activeFaqIndex === i">
-              <p>{{ faq.answer }}</p>
-            </div>
+            <div class="acc-body" [class.show]="activeFaqIndex === i"><p>{{ faq.answer }}</p></div>
           </div>
         </div>
       </div>
