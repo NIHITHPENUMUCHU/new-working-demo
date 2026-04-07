@@ -3,33 +3,32 @@
   --c-teal: #0D9488;
   --c-orange: #EA580C;
   --c-peach-light: #FFF7ED;
-  
+
   display: block;
   min-height: 100vh;
   background: var(--c-peach-light);
   font-family: 'Inter', sans-serif;
 }
 
-/* FIX 2: BULLETPROOF MODAL OVERLAY STYLES */
 .custom-modal-overlay {
-  position: fixed; 
-  top: 0; left: 0; right: 0; bottom: 0; 
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
   width: 100vw; height: 100vh; margin: 0; padding: 0;
-  background: rgba(15, 23, 42, 0.75); 
+  background: rgba(15, 23, 42, 0.75);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  z-index: 9999; /* Exceeds Global Nav Header */
-  display: flex; 
-  justify-content: center; 
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
   align-items: center;
 }
 
 .custom-modal-content {
-  background: #ffffff; 
-  width: 90%; 
-  max-width: 420px; 
-  padding: 35px; 
-  border-radius: 16px; 
-  text-align: center; 
+  background: #ffffff;
+  width: 90%;
+  max-width: 420px;
+  padding: 35px;
+  border-radius: 16px;
+  text-align: center;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 
   h3 { font-family: 'Montserrat', sans-serif; color: var(--c-navy); font-size: 1.5rem; margin: 0 0 15px 0; }
@@ -47,8 +46,6 @@
   .btn-secondary { background: #f1f5f9; color: #475569; &:hover { background: #e2e8f0; } }
   .btn-danger { background: #dc2626; color: #ffffff; &:hover { background: #b91c1c; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); } }
 }
-
-/* ----------------------------------------- */
 
 .page-wrapper {
   padding: 105px 40px 40px 40px;
@@ -245,6 +242,7 @@
 
 .empty-state { padding: 40px; text-align: center; color: #94a3b8; font-size: 1.1rem; background: #fff; border-radius: 12px; border: 1px dashed #cbd5e1; }
 
+/* THE INVISIBLE TICKET FIX FOR THE BROWSER DOM */
 .animate-slide-up { opacity: 0; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -253,6 +251,16 @@
   svg { width: 16px; height: 16px; }
   &:hover:not(:disabled) { background: var(--c-teal); color: #ffffff; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3); }
   &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.global-search-wrapper {
+  position: relative; width: 100%; max-width: 400px; margin-bottom: 20px;
+  .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #94a3b8; }
+  input { 
+    width: 100%; padding: 12px 16px 12px 45px; border-radius: 8px; border: 1px solid #e2e8f0; background: #ffffff; font-size: 14px; font-family: 'Inter', sans-serif; color: var(--c-navy); transition: all 0.3s ease; 
+    &::placeholder { color: #94a3b8; font-weight: 500; }
+    &:focus { outline: none; border-color: var(--c-teal); box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.15); }
+  }
 }
 
 @media (max-width: 900px) {
@@ -265,4 +273,105 @@
     .qr-container { margin: 0; img, &.expired-qr { width: 80px; height: 80px; } &.expired-qr { svg { width: 24px; height: 24px; margin-bottom: 4px; } span { font-size: 10px; } } } 
   }
   .detail-row { grid-template-columns: 1fr !important; }
+}
+
+@media print {
+  /* 1. Strip default browser margins */
+  @page { size: auto; margin: 0; }
+  
+  /* 2. KILL THE PEACH BACKGROUND AND GLOBAL NAV */
+  :host { background: transparent !important; background-color: transparent !important; }
+  html, body { background-color: #ffffff !important; }
+
+  /* 3. THE INVISIBLE TICKET FIX: Force everything to be visible and un-animated */
+  *, *::before, *::after, .animate-slide-up, .digital-ticket, .print-target {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+  
+  /* 4. Hide ALL surrounding elements permanently */
+  .page-header, .tab-navigation, .catalog-grid, .custom-loader-overlay, .custom-modal-overlay, .empty-state, .global-search-wrapper, .ticket-top-actions, .no-print { 
+    display: none !important; 
+  }
+
+  /* 5. Strip the padding from the page wrapper so the ticket aligns correctly */
+  .page-wrapper { 
+    padding: 0 !important; 
+    margin: 0 !important; 
+    max-width: none !important; 
+    background: transparent !important;
+  }
+
+  /* 6. Turn off the grid gap and flex columns that might distort the page */
+  .tickets-grid {
+    display: block !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* 7. Hide all un-targeted tickets! */
+  .digital-ticket:not(.print-target) { 
+    display: none !important; 
+  }
+
+  /* 8. ONLY render the target ticket, locking it into exact A4 width specs */
+  .digital-ticket.print-target {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100% !important;
+    max-width: 220mm !important;
+    margin: 20mm auto !important; 
+    border: 2px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    background-color: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .ticket-body { 
+    width: 70% !important; 
+    padding: 20px !important; 
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  /* Force dark background on the stub for contrast */
+  .ticket-stub { 
+    width: 30% !important; 
+    background-color: #0F172A !important; 
+    color: #fff !important; 
+    border-left: 3px dashed #cbd5e1 !important; 
+    padding: 20px !important; 
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .stub-cutout-top, .stub-cutout-bottom {
+    background-color: #ffffff !important; 
+  }
+
+  .qr-container { 
+    border: 2px solid #ffffff !important; 
+    padding: 6px !important;
+    margin: 10px 0 !important;
+    img { width: 100px !important; height: 100px !important; }
+  }
+
+  .ticket-note {
+    background-color: #FFF7ED !important;
+    border-left: 4px solid #EA580C !important;
+    padding: 8px 12px !important; 
+    margin-top: 15px !important; 
+  }
+  
+  .status-badge { border: 1px solid #0D9488 !important; }
 }

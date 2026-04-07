@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpService } from '../../services/http.service';
 
@@ -26,7 +26,8 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
 
   private pollingInterval: any; 
 
-  constructor(public router: Router, public httpService: HttpService) { }
+  // FIX: Injected ChangeDetectorRef
+  constructor(public router: Router, public httpService: HttpService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.username = localStorage.getItem('username') || 'client';
@@ -50,7 +51,7 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
   get filteredTickets() {
     if (!this.ticketSearchTerm) return this.myTickets;
     const term = this.ticketSearchTerm.toLowerCase();
-    return this.myTickets.filter(t => t.title?.toLowerCase().includes(term) || (t.eventID || t.id || t.uniqueTicketId)?.toString().includes(term));
+    return this.myTickets.filter(t => t.title?.toLowerCase().includes(term) || (t.uniqueTicketId || t.eventID || t.id)?.toString().includes(term));
   }
 
   fetchActiveEvents(): void { this.httpService.getActiveEvents().subscribe(data => this.availableEvents = data); }
@@ -65,14 +66,13 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
     let updated = false; let checksCompleted = 0;
     
     this.myTickets.forEach((ticket, index) => {
-      // FIX 1: If the user manually cancelled this pass, NEVER overwrite it with the live event status!
       if (ticket.status === 'CANCELLED' && ticket.userCancelled === true) {
         checksCompleted++;
         if (checksCompleted === this.myTickets.length && updated) {
           this.myTickets = [...this.myTickets]; 
           localStorage.setItem('myTickets_' + this.username, JSON.stringify(this.myTickets));
         }
-        return; // Skip server sync for this specific ticket
+        return; 
       }
 
       const eventId = ticket.eventID || ticket.id;
@@ -133,7 +133,6 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
     this.httpService.cancelEventPass(eventId, qty).subscribe(() => {
       const index = this.myTickets.findIndex(t => t.uniqueTicketId === this.ticketToCancel.uniqueTicketId);
       if (index !== -1) {
-        // FIX 1: Lock the ticket into 'CANCELLED' state permanently using the userCancelled flag
         this.myTickets[index].status = 'CANCELLED';
         this.myTickets[index].userCancelled = true; 
         localStorage.setItem('myTickets_' + this.username, JSON.stringify(this.myTickets));
@@ -153,9 +152,24 @@ export class BookingDetailsComponent implements OnInit, OnDestroy {
     else if (tab === 'CATALOG') this.fetchActiveEvents();
   }
 
+  // FIX: Force Change Detection before printing
   printTicket(ticket: any): void {
     this.isPrinting = true;
-    this.printingTicketId = ticket.eventID || ticket.id || ticket.uniqueTicketId;
-    setTimeout(() => { window.print(); this.printingTicketId = null; this.isPrinting = false; }, 1200); 
+    this.printingTicketId = ticket.uniqueTicketId || ticket.eventID || ticket.id;
+    this.cdr.detectChanges(); // Immediately apply the loading screen
+    
+    setTimeout(() => { 
+      this.isPrinting = false; 
+      this.cdr.detectChanges(); // Immediately strip the loading screen
+      
+      setTimeout(() => {
+        window.print(); 
+        
+        setTimeout(() => {
+          this.printingTicketId = null;
+          this.cdr.detectChanges(); // Cleanup
+        }, 1000);
+      }, 100); 
+    }, 1000); 
   }
 }
