@@ -3,7 +3,6 @@
 
     <div class="auth-banner login-banner">
       <div class="banner-content">
-
         <svg class="brand-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="50" cy="50" r="40" fill="var(--c-teal)" opacity="0.1"></circle>
           <circle cx="50" cy="50" r="36" stroke="var(--c-teal)" stroke-width="2" stroke-dasharray="12 6"></circle>
@@ -39,43 +38,41 @@
         <p>Enter your credentials to continue.</p>
       </div>
 
-      <div *ngIf="showError" class="alert alert-danger">{{ errorMessage }}</div>
-
       <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
           <label>Username</label>
           <div class="input-wrapper" [class.is-valid]="isUsernameValid" [class.is-invalid]="itemForm.get('username')?.touched && itemForm.get('username')?.invalid">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             <input type="text" formControlName="username" placeholder="Enter your username">
             <svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </div>
           <div *ngIf="itemForm.get('username')?.touched && itemForm.get('username')?.invalid" class="validation-error">
             <span *ngIf="itemForm.get('username')?.errors?.['required']">Username is required.</span>
-            <span *ngIf="itemForm.get('username')?.errors?.['pattern']">Must be 4-20 characters (no spaces / symbols allowed).</span>
+            <span *ngIf="itemForm.get('username')?.errors?.['pattern']">Must be 4-20 characters (no spaces).</span>
           </div>
         </div>
 
         <div class="form-group">
           <label>Password</label>
           <div class="input-wrapper" [class.is-valid]="isPasswordValid" [class.is-invalid]="itemForm.get('password')?.touched && itemForm.get('password')?.invalid">
-            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
-            </svg>
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
             <input type="password" formControlName="password" placeholder="Enter your password">
             <svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </div>
           <div *ngIf="itemForm.get('password')?.touched && itemForm.get('password')?.invalid" class="validation-error">
             <span *ngIf="itemForm.get('password')?.errors?.['required']">Password is required.</span>
-            <span *ngIf="itemForm.get('password')?.errors?.['pattern']">Must be at least 8 characters, 1 uppercase, 1 lowercase, 1 number, and 1 symbol.</span>
           </div>
         </div>
 
         <button type="submit" class="auth-btn" [disabled]="!itemForm.valid || isLoading">
           {{ isLoading ? 'Connecting...' : 'Login' }}
         </button>
+
+        <div *ngIf="showError" class="alert alert-danger" style="margin-top: 15px; margin-bottom: 0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          {{ errorMessage }}
+        </div>
+
         <div style="text-align: center; margin-top: 15px;">
           <a routerLink="/forgot-password" style="color: var(--c-teal); font-size: 0.9rem; text-decoration: none; font-weight: 600;">Forgot Password?</a>
         </div>

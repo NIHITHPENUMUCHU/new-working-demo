@@ -3,11 +3,11 @@
     <div class="header-icon teal-bg">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
     </div>
-    <div class="header-text"><h2>Event Operations</h2><p>Manage execution and live status of events assigned to you.</p></div>
+    <div class="header-text">
+      <h2>Event Operations</h2>
+      <p>Manage execution and live status of events assigned to you.</p>
+    </div>
   </div>
-
-  <div *ngIf="showMessage" class="alert alert-success">{{ responseMessage }}</div>
-  <div *ngIf="showError" class="alert alert-danger">{{ errorMessage }}</div>
 
   <div class="enterprise-card table-card">
     <div class="table-header-flex" style="padding: 25px 25px 0 25px;">
@@ -21,7 +21,13 @@
     <div class="table-responsive">
       <table class="data-table">
         <thead>
-          <tr><th>Event ID</th><th>Details</th><th>Target Capacity</th><th>Current Status</th><th>Actions</th></tr>
+          <tr>
+            <th>Event ID</th>
+            <th>Details</th>
+            <th>Target Capacity</th>
+            <th>Current Status</th>
+            <th>Actions</th>
+          </tr>
         </thead>
         <tbody>
           <ng-container *ngFor="let ev of paginatedEventList">
@@ -62,19 +68,33 @@
                       <button type="button" class="btn-cancel" (click)="cancelEdit()">Cancel</button>
                       <button type="submit" class="btn-save" [disabled]="!itemForm.valid">Save Updates</button>
                     </div>
+
+                    <div *ngIf="showMessage" class="alert alert-success" style="margin-top: 15px; margin-bottom: 0;">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      {{ responseMessage }}
+                    </div>
+                    <div *ngIf="showError" class="alert alert-danger" style="margin-top: 15px; margin-bottom: 0;">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                      {{ errorMessage }}
+                    </div>
+
                   </form>
                 </div>
               </td>
             </tr>
           </ng-container>
-          <tr *ngIf="filteredEventList.length === 0"><td colspan="5" class="empty-state">No events assigned to you match your search.</td></tr>
+          <tr *ngIf="filteredEventList.length === 0">
+            <td colspan="5" class="empty-state">No events assigned to you match your search.</td>
+          </tr>
         </tbody>
       </table>
     </div>
     
     <div class="pagination-container" *ngIf="totalPages > 1">
       <button class="page-btn nav-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Prev</button>
-      <div class="page-numbers"><button *ngFor="let p of getPagesArray()" class="page-btn" [class.active]="p === currentPage" (click)="changePage(p)">{{ p }}</button></div>
+      <div class="page-numbers">
+        <button *ngFor="let p of getPagesArray()" class="page-btn" [class.active]="p === currentPage" (click)="changePage(p)">{{ p }}</button>
+      </div>
       <button class="page-btn nav-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">Next</button>
     </div>
   </div>

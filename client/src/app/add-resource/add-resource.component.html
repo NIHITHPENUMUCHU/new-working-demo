@@ -17,9 +17,6 @@
     <div class="enterprise-card form-card">
       <h3>Register Asset</h3>
 
-      <div *ngIf="showMessage" class="alert alert-success">{{ responseMessage }}</div>
-      <div *ngIf="showError" class="alert alert-danger">{{ errorMessage }}</div>
-
       <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
           <label>Resource Name</label>
@@ -47,6 +44,15 @@
         </div>
 
         <button type="submit" class="btn-primary orange-btn" [disabled]="!itemForm.valid">Add to Inventory</button>
+
+        <div *ngIf="showMessage" class="alert alert-success" style="margin-top: 15px; margin-bottom: 0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          {{ responseMessage }}
+        </div>
+        <div *ngIf="showError" class="alert alert-danger" style="margin-top: 15px; margin-bottom: 0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          {{ errorMessage }}
+        </div>
       </form>
     </div>
 
@@ -91,17 +97,13 @@
       </div>
 
       <div class="pagination-container" *ngIf="totalPages > 1">
-        <button class="page-btn nav-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg> Prev
-        </button>
+        <button class="page-btn nav-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">Prev</button>
         <div class="page-numbers">
           <button *ngFor="let p of getPagesArray()" class="page-btn" [class.active]="p === currentPage" (click)="changePage(p)">
             {{ p }}
           </button>
         </div>
-        <button class="page-btn nav-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
-          Next <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </button>
+        <button class="page-btn nav-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">Next</button>
       </div>
 
     </div>

@@ -7,9 +7,6 @@
         <p>Enter your details to initialize your workspace.</p>
       </div>
 
-      <div *ngIf="showMessage" class="alert alert-success">{{ responseMessage }}</div>
-      <div *ngIf="showError" class="alert alert-danger">{{ errorMessage }}</div>
-
       <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
           <label>Username</label>
@@ -138,6 +135,15 @@
         <button type="submit" class="auth-btn" [disabled]="!itemForm.valid || isLoading">
           {{ isLoading ? 'Initializing...' : 'Create Account' }}
         </button>
+
+        <div *ngIf="showMessage" class="alert alert-success" style="margin-top: 15px; margin-bottom: 0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; margin-right: 8px; vertical-align: middle;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          {{ responseMessage }}
+        </div>
+        <div *ngIf="showError" class="alert alert-danger" style="margin-top: 15px; margin-bottom: 0;">
+          {{ errorMessage }}
+        </div>
+
       </form>
 
       <div class="auth-footer">
