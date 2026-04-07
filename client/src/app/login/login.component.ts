@@ -14,6 +14,9 @@ export class LoginComponent implements OnInit {
   showError: boolean = false;
   errorMessage: string = '';
   isLoading: boolean = false;
+  
+  // NEW: State for the password toggle
+  showPassword = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -23,7 +26,6 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Re-introduced the strict enterprise password validator
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*_=+-]).{8,}$/;
 
     this.itemForm = this.formBuilder.group({
@@ -39,6 +41,11 @@ export class LoginComponent implements OnInit {
   
   get isPasswordValid() { 
     return this.itemForm.get('password')?.valid && this.itemForm.get('password')?.dirty; 
+  }
+
+  // --- NEW: TOGGLE FUNCTION ---
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 
   onSubmit(): void {
@@ -65,12 +72,9 @@ export class LoginComponent implements OnInit {
             localStorage.setItem('lastLogin_' + normalizedName, new Date().toISOString());
 
             const userRole = res.role.toUpperCase();
-            if (userRole === 'PLANNER') {
+            
+            if (userRole === 'PLANNER' || userRole === 'STAFF' || userRole === 'CLIENT') {
               this.router.navigateByUrl('/dashboard');
-            } else if (userRole === 'STAFF') {
-              this.router.navigateByUrl('/view-events');
-            } else if (userRole === 'CLIENT') {
-              this.router.navigateByUrl('/booking-details');
             } else {
               this.router.navigateByUrl('/');
             }

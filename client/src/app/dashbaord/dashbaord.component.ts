@@ -20,25 +20,28 @@ export class DashbaordComponent implements OnInit, OnDestroy {
   activeAllocations: number = 0; itemsReturned: number = 0; 
   resourceUtilization: number = 0;
   
-  // LIVE MONITOR & LEDGER ARRAYS
   activeEvents: any[] = [];
   rawEventData: any[] = []; 
   recentEvents: any[] = []; 
+  myAssignedEvents: any[] = [];
+  publicEvents: any[] = [];
 
-  // CAROUSEL LOGIC FOR LIVE MONITOR
   monitorStartIndex: number = 0;
   monitorDisplayCount: number = 3; 
 
   staffEventCount: number = 0;
+  staffAssignedCount: number = 0;
+  staffOngoingCount: number = 0;
+  staffPublicCount: number = 0;
   clientPassCount: number = 0;
 
   showFAQ: boolean = false; 
   activeFaqIndex: number | null = null;
   faqs = [
-    { question: 'How do I secure an entry pass?', answer: 'Click "Open Client Portal" to browse the active event catalog. If an event has available capacity, you can secure your digital pass instantly.' },
-    { question: 'How do I download my ticket as a PDF?', answer: 'Inside the portal, navigate to the "My Digital Passes" tab. Click the "Save as PDF" button on any active pass to generate a printable ticket.' },
-    { question: 'What happens if an event is sold out?', answer: 'Our live capacity engine automatically locks bookings the moment maximum capacity is reached.' },
-    { question: 'What do the different event statuses mean?', answer: '"Scheduled" means upcoming. "Ongoing" means operations are live. "Completed" means ended. "Cancelled" means the event was aborted and tickets are invalid.' }
+    { question: 'How do I secure an entry pass?', answer: 'Click "Open Client Portal" to browse the active event catalog.' },
+    { question: 'How do I download my ticket as a PDF?', answer: 'Inside the portal, navigate to the "My Digital Passes" tab.' },
+    { question: 'What happens if an event is sold out?', answer: 'Our live capacity engine automatically locks bookings.' },
+    { question: 'What do the different event statuses mean?', answer: '"Scheduled" means upcoming. "Ongoing" means operations are live. "Completed" means ended.' }
   ];
 
   private pollingInterval: any;
@@ -72,15 +75,10 @@ export class DashbaordComponent implements OnInit, OnDestroy {
     const storedPreviousLogin = localStorage.getItem(previousLoginKey);
     this.lastLogin = storedPreviousLogin ? new Date(storedPreviousLogin) : new Date();
 
-    if (this.roleName === 'PLANNER') {
+    if (this.roleName === 'PLANNER' || this.roleName === 'STAFF') {
       this.fetchLiveMetrics();
       this.pollingInterval = setInterval(() => { this.fetchLiveMetrics(); }, 5000);
     } 
-    else if (this.roleName === 'STAFF') {
-      this.httpService.getStaffEvents(rawUsernameForKeys).subscribe((data: any[]) => { 
-        if (data) this.staffEventCount = data.length; 
-      });
-    }
     else if (this.roleName === 'CLIENT') {
       const tickets = localStorage.getItem('myTickets_' + rawUsernameForKeys);
       if (tickets) this.clientPassCount = JSON.parse(tickets).length;
@@ -97,13 +95,13 @@ export class DashbaordComponent implements OnInit, OnDestroy {
   }
 
   fetchLiveMetrics(): void {
-    this.httpService.GetAllevents().subscribe((data: any[]) => { 
+    const currentUsername = (localStorage.getItem('username') || '').toLowerCase().trim();
+
+    if (this.roleName === 'PLANNER') {
+      this.httpService.GetAllevents().subscribe((data: any[]) => { 
         if (data) {
           this.rawEventData = data; 
-          
-          const currentUsername = localStorage.getItem('username');
-          // STRICT FILTER: Only show events created by the logged-in Planner
-          const myEvents = data.filter(e => e.plannerUsername === currentUsername);
+          const myEvents = data.filter(e => e.plannerUsername && e.plannerUsername.toLowerCase().trim() === currentUsername);
 
           this.totalEvents = myEvents.length;
           this.scheduledEvents = myEvents.filter(e => e.status?.toUpperCase() === 'SCHEDULED').length;
@@ -112,123 +110,126 @@ export class DashbaordComponent implements OnInit, OnDestroy {
 
           this.activeEvents = myEvents
             .filter(e => e.status?.toUpperCase() === 'SCHEDULED' || e.status?.toUpperCase() === 'ONGOING')
-            .map(e => {
-              const booked = Number(e.bookedCount) || 0;
-              const max = Number(e.maxCapacity) || 1; 
-              let fillPercentage = Math.round((booked / max) * 100);
-              if (fillPercentage > 100) fillPercentage = 100;
-              if (fillPercentage < 0) fillPercentage = 0;
-              return { ...e, fillPercentage, safeBooked: booked, safeMax: max };
-            })
+            .map(e => this.calculateFill(e))
             .sort((a, b) => b.fillPercentage - a.fillPercentage);
 
           this.recentEvents = [...myEvents].sort((a, b) => {
             const idA = a.eventID || a.id || 0;
             const idB = b.eventID || b.id || 0;
-            return idB - idA; // Sort highest ID (newest) first
+            return idB - idA;
           }).slice(0, 5);
         }
-    });
-
-    this.httpService.GetAllResources().subscribe((data: any[]) => { 
+      });
+    } 
+    else if (this.roleName === 'STAFF') {
+      this.httpService.getStaffEvents(currentUsername).subscribe((data: any[]) => {
         if (data) {
-          this.totalResources = data.length;
-          this.availableResources = data.filter(res => res.availability === true).length;
-          this.resourceUtilization = this.totalResources > 0 ? Math.round(((this.totalResources - this.availableResources) / this.totalResources) * 100) : 0;
+          this.rawEventData = data; 
+          
+          this.myAssignedEvents = data.filter(e => 
+            e.assignedStaffUsername && e.assignedStaffUsername.toLowerCase().trim() === currentUsername
+          );
+          
+          this.staffAssignedCount = this.myAssignedEvents.length;
+          this.staffEventCount = this.myAssignedEvents.length; 
+          this.staffOngoingCount = this.myAssignedEvents.filter(e => e.status?.toUpperCase() === 'ONGOING').length;
+          this.scheduledEvents = this.myAssignedEvents.filter(e => e.status?.toUpperCase() === 'SCHEDULED').length;
+          this.completedEvents = this.myAssignedEvents.filter(e => e.status?.toUpperCase() === 'COMPLETED').length;
+
+          // --- FIX: Filter out CANCELLED and COMPLETED events from the Public Pool
+          this.publicEvents = data.filter(e => 
+            (!e.assignedStaffUsername || 
+            e.assignedStaffUsername.trim() === '' || 
+            e.assignedStaffUsername.toLowerCase().trim() === 'public') &&
+            e.status?.toUpperCase() !== 'CANCELLED' && 
+            e.status?.toUpperCase() !== 'COMPLETED'
+          );
+          this.staffPublicCount = this.publicEvents.length;
+
+          this.activeEvents = this.myAssignedEvents
+            .filter(e => e.status?.toUpperCase() === 'SCHEDULED' || e.status?.toUpperCase() === 'ONGOING')
+            .map(e => this.calculateFill(e))
+            .sort((a, b) => b.fillPercentage - a.fillPercentage);
         }
-    });
+      });
+    }
 
-    this.httpService.getAllAllocations().subscribe((data: any[]) => {
-        if (data) {
-          const seen = new Set();
-          let deployed = 0; let returned = 0;
-          data.forEach(alloc => {
-            const uniqueKey = `${alloc.event?.eventID}-${alloc.resource?.resourceID}`;
-            if (!seen.has(uniqueKey)) {
-              seen.add(uniqueKey);
-              if (alloc.status === 'RETURNED') { returned++; } else { deployed++; }
+    if (this.roleName === 'PLANNER') {
+        this.httpService.GetAllResources().subscribe((data: any[]) => { 
+            if (data) {
+              this.totalResources = data.length;
+              this.availableResources = data.filter(res => res.availability === true).length;
+              this.resourceUtilization = this.totalResources > 0 ? Math.round(((this.totalResources - this.availableResources) / this.totalResources) * 100) : 0;
             }
-          });
-          this.activeAllocations = deployed;
-          this.itemsReturned = returned;
-        }
-    });
+        });
+
+        this.httpService.getAllAllocations().subscribe((data: any[]) => {
+            if (data) {
+              const seen = new Set();
+              let deployed = 0; let returned = 0;
+              data.forEach(alloc => {
+                const uniqueKey = `${alloc.event?.eventID}-${alloc.resource?.resourceID}`;
+                if (!seen.has(uniqueKey)) {
+                  seen.add(uniqueKey);
+                  if (alloc.status === 'RETURNED') { returned++; } else { deployed++; }
+                }
+              });
+              this.activeAllocations = deployed;
+              this.itemsReturned = returned;
+            }
+        });
+    }
   }
 
-  // --- CAROUSEL NAVIGATION LOGIC ---
+  calculateFill(e: any) {
+    const booked = Number(e.bookedCount) || 0;
+    const max = Number(e.maxCapacity) || 1; 
+    let fillPercentage = Math.round((booked / max) * 100);
+    if (fillPercentage > 100) fillPercentage = 100;
+    if (fillPercentage < 0) fillPercentage = 0;
+    return { ...e, fillPercentage, safeBooked: booked, safeMax: max };
+  }
+
   get visibleMonitorEvents() {
     return this.activeEvents.slice(this.monitorStartIndex, this.monitorStartIndex + this.monitorDisplayCount);
   }
+  nextMonitorEvent(): void { if (this.monitorStartIndex + this.monitorDisplayCount < this.activeEvents.length) this.monitorStartIndex++; }
+  prevMonitorEvent(): void { if (this.monitorStartIndex > 0) this.monitorStartIndex--; }
 
-  nextMonitorEvent(): void {
-    if (this.monitorStartIndex + this.monitorDisplayCount < this.activeEvents.length) {
-      this.monitorStartIndex++;
-    }
-  }
-
-  prevMonitorEvent(): void {
-    if (this.monitorStartIndex > 0) {
-      this.monitorStartIndex--;
-    }
-  }
-
-  // --- PERFECTED CSV EXPORT LOGIC ---
   exportToCSV(): void {
-    const currentUsername = localStorage.getItem('username');
-    
-    // 1. Strictly filter to only the logged-in Planner's events
-    const myEvents = this.rawEventData.filter(e => e.plannerUsername === currentUsername);
+    const currentUsername = (localStorage.getItem('username') || '').toLowerCase().trim();
+    const myEvents = this.rawEventData.filter(e => {
+      const planner = e.plannerUsername ? e.plannerUsername.toLowerCase().trim() : '';
+      const staff = e.assignedStaffUsername ? e.assignedStaffUsername.toLowerCase().trim() : '';
+      return planner === currentUsername || staff === currentUsername;
+    });
 
     if (!myEvents || myEvents.length === 0) {
       alert("No events found to export.");
       return;
     }
 
-    // 2. Safe Escape Function: Wraps data in quotes to prevent commas/newlines from breaking the Excel layout
-    const escapeCSV = (str: any) => {
-      if (str === null || str === undefined) return '""';
-      const stringVal = String(str);
-      return `"${stringVal.replace(/"/g, '""')}"`; 
-    };
-
-    // 3. Define the precise requested headers
+    const escapeCSV = (str: any) => `"${String(str || '').replace(/"/g, '""')}"`; 
     let csvContent = "Event Name,Description,Date,Max Attendee,Lead Staff,Location\n";
 
-    // 4. Map the data row by row
     myEvents.forEach(ev => {
       const name = escapeCSV(ev.title);
       const description = escapeCSV(ev.description || 'No description provided');
-      
-      // FIX: Formatted Date to prevent Excel ##### error
       let dateStr = '"TBD"';
       if (ev.dateTime) {
         const d = new Date(ev.dateTime);
-        // Formats as "Apr 08, 2026" which Excel reads beautifully without squishing
-        const formattedDate = d.toLocaleDateString('en-US', { 
-          year: 'numeric', 
-          month: 'short', 
-          day: '2-digit' 
-        });
-        dateStr = escapeCSV(formattedDate);
+        dateStr = escapeCSV(d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }));
       }
-
       const capacity = escapeCSV(ev.maxCapacity);
       const staff = escapeCSV(ev.assignedStaffUsername ? ev.assignedStaffUsername : 'Public');
       const location = escapeCSV(ev.location);
-
       csvContent += `${name},${description},${dateStr},${capacity},${staff},${location}\n`;
     });
 
-    // 5. Trigger the secure download
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    
-    // Append a timestamp so planners can download multiple reports without overwriting files locally
-    const timestamp = new Date().getTime();
-    link.setAttribute("download", `My_Events_Export_${timestamp}.csv`);
-    link.style.visibility = 'hidden';
+    link.setAttribute("href", URL.createObjectURL(blob));
+    link.setAttribute("download", `My_Events_Export_${new Date().getTime()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

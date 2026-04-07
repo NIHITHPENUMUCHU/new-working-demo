@@ -19,7 +19,7 @@ public class Resource {
     @JsonProperty("availability")
     private boolean availability;
     
-    @JsonProperty("quantity") // THE FIX: Forces Java to map the quantity from Angular perfectly!
+    @JsonProperty("quantity") // Forces Java to map the quantity from Angular perfectly!
     private int quantity; 
 
     public Resource() {}

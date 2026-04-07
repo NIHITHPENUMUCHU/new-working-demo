@@ -60,7 +60,7 @@ public class EventService {
         event.setBookedCount(event.getBookedCount() + quantity);
         eventRepository.save(event);
 
-        // FIX: Notify Planner that a ticket was booked!
+        // Notify Planner that a ticket was booked!
         try {
             Notification notif = new Notification();
             String plannerName = event.getPlannerUsername();

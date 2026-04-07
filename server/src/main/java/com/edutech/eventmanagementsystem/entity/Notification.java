@@ -12,10 +12,10 @@ public class Notification {
     private String message;
     private String targetRole;
     
-    // THE FIX: java.util.Date automatically formats to perfect local time in Angular!
+    // java.util.Date automatically formats to perfect local time in Angular!
     private Date timestamp = new Date(); 
     
-    // NEW FEATURE: Read Status
+    // Read Status
     private boolean isRead = false; 
 
     public Notification() {}

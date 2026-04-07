@@ -73,7 +73,7 @@ public class EventPlannerController {
         return ResponseEntity.ok(resourceService.allocateResourcesBulk(eventId, allocations));
     }
 
-    // --- TARGETED NOTIFICATIONS ENGINE (FIXED CASE-SENSITIVITY) ---
+    // --- TARGETED NOTIFICATIONS ENGINE ---
     @GetMapping("/notifications")
     public ResponseEntity<List<Notification>> getPlannerNotifications() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();

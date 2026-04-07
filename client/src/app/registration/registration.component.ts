@@ -19,6 +19,10 @@ export class RegistrationComponent implements OnInit, OnDestroy {
   
   roleSubscription!: Subscription;
 
+  // --- NEW: TOGGLE STATES ---
+  showPassword = false;
+  showAuthCode = false;
+
   // --- ENTERPRISE SECURITY CODES ---
   readonly PLANNER_CODE = 'PLANNER-ADMIN-2026';
   readonly STAFF_CODE = 'STAFF-OPERATIONS-2026';
@@ -88,6 +92,15 @@ export class RegistrationComponent implements OnInit, OnDestroy {
     if (this.roleSubscription) {
       this.roleSubscription.unsubscribe();
     }
+  }
+
+  // --- NEW: TOGGLE FUNCTIONS ---
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+  
+  toggleAuthCodeVisibility(): void {
+    this.showAuthCode = !this.showAuthCode;
   }
 
   // --- LIVE VALIDATION HELPERS ---

@@ -38,7 +38,7 @@ public class ClientController {
         return ResponseEntity.ok().build();
     }
 
-    // --- NEW: CLIENT CANCELLATION ENDPOINT ---
+    // CLIENT CANCELLATION ENDPOINT ---
     @PostMapping("/cancel-booking/{eventId}/{quantity}")
     public ResponseEntity<?> cancelBooking(@PathVariable Long eventId, @PathVariable Integer quantity) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();

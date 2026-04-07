@@ -2,8 +2,8 @@
   --c-navy: #0F172A;
   --c-teal: #0D9488;
   --c-orange: #EA580C;
-  --c-green: #10B981; /* NEW */
-  --c-red: #EF4444;   /* NEW */
+  --c-green: #10B981; 
+  --c-red: #EF4444;   
   --c-peach-light: #FFF7ED;
   --c-peach: #FED7AA;
   
@@ -96,7 +96,7 @@
       background: #f8fafc;
       border: 2px solid #e2e8f0;
       color: var(--c-navy);
-      padding: 14px 45px 14px 45px; /* Ensures padding for both left and right icons */
+      padding: 14px 45px 14px 45px; 
       border-radius: 8px;
       font-size: 15px;
       transition: all 0.3s ease;
@@ -112,28 +112,34 @@
       &::placeholder { color: #94a3b8; }
     }
 
-    /* --- THE LIVE STATUS ICON (TICK MARK) --- */
-    .status-icon {
-      position: absolute; right: 16px; width: 18px; height: 18px; color: #cbd5e1;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;
+    input.password-input { padding-right: 75px; }
+
+    .eye-toggle-btn {
+      position: absolute; right: 44px; background: none; border: none; padding: 0; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: color 0.2s ease; outline: none;
+      svg { width: 18px; height: 18px; }
+      &:hover { color: var(--c-teal); }
     }
 
-    /* --- LIVE VALIDATION STATES --- */
+    .status-icon {
+      position: absolute; right: 16px; width: 18px; height: 18px; color: #cbd5e1; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none;
+    }
+
     &.is-valid {
       input { border-color: var(--c-green); background: #ffffff; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
       .status-icon { color: var(--c-green); transform: scale(1.2); filter: drop-shadow(0 0 3px rgba(16, 185, 129, 0.3)); }
     }
     
-    &.is-invalid { 
-      input { border-color: var(--c-red); background: #fef2f2; } 
-    }
+    &.is-invalid { input { border-color: var(--c-red); background: #fef2f2; } }
   }
 }
 
 .validation-error { color: var(--c-orange); font-size: 12px; margin-top: 6px; font-weight: 600; display: block; line-height: 1.4; }
 
+/* FIX: Ensure alert icons are always sized correctly */
 .alert {
   padding: 14px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 600; border-left: 4px solid;
+  display: flex; align-items: center; gap: 10px;
+  svg { width: 20px; height: 20px; flex-shrink: 0; }
   &-danger { background: rgba(234, 88, 12, 0.1); color: var(--c-orange); border-left-color: var(--c-orange); }
 }
 
@@ -149,30 +155,18 @@
   a { color: var(--c-teal); font-weight: 600; text-decoration: none; transition: color 0.2s; &:hover { color: var(--c-orange); text-decoration: underline; } }
 }
 
-/* --- CUSTOM LOGO LOADER OVERLAY --- */
 .custom-loader-overlay {
   position: absolute; top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center;
 
   .animated-brand-logo {
-    width: 70px; height: 70px;
-    animation: floatLogo 3s ease-in-out infinite;
-    filter: drop-shadow(0 10px 15px rgba(13, 148, 136, 0.3));
-
-    svg {
-      width: 100%; height: 100%;
-      .brand-poly { stroke: var(--c-teal); stroke-dasharray: 80; stroke-dashoffset: 80; animation: drawPoly 2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate; }
-      .brand-dot { fill: var(--c-orange); opacity: 0; transform-origin: center; transform: scale(0); animation: popDot 4s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
-    }
+    width: 70px; height: 70px; animation: floatLogo 3s ease-in-out infinite; filter: drop-shadow(0 10px 15px rgba(13, 148, 136, 0.3));
+    svg { width: 100%; height: 100%; .brand-poly { stroke: var(--c-teal); stroke-dasharray: 80; stroke-dashoffset: 80; animation: drawPoly 2s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate; } .brand-dot { fill: var(--c-orange); opacity: 0; transform-origin: center; transform: scale(0); animation: popDot 4s cubic-bezier(0.4, 0, 0.2, 1) infinite; } }
   }
-
   .loader-text {
-    margin-top: 20px; color: var(--c-navy); font-weight: 800; font-family: 'Montserrat', sans-serif;
-    font-size: 1.1rem; letter-spacing: 0.5px;
-    background: linear-gradient(90deg, var(--c-navy), var(--c-teal), var(--c-navy));
-    background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    animation: shimmerText 2s linear infinite;
+    margin-top: 20px; color: var(--c-navy); font-weight: 800; font-family: 'Montserrat', sans-serif; font-size: 1.1rem; letter-spacing: 0.5px;
+    background: linear-gradient(90deg, var(--c-navy), var(--c-teal), var(--c-navy)); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmerText 2s linear infinite;
   }
 }
 

@@ -2,11 +2,11 @@ package com.edutech.eventmanagementsystem.dto;
 
 public class LoginResponse {
     private String token;
-    private String role; // CRITICAL: Added role
+    private String role; 
 
     public LoginResponse() {}
     
-    // CRITICAL: Updated constructor
+    // Updated constructor
     public LoginResponse(String token, String role) {
         this.token = token;
         this.role = role;

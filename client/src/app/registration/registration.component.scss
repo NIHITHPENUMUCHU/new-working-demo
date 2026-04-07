@@ -48,6 +48,30 @@
       &:focus { border-color: var(--c-teal); box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); background: #ffffff; }
     }
 
+    /* Extra padding for hidden inputs so text doesn't overlap the eye */
+    input.password-input {
+      padding-right: 75px !important;
+    }
+
+    /* --- THE EYE TOGGLE BUTTON --- */
+    .eye-toggle-btn {
+      position: absolute;
+      right: 44px; /* Perfectly aligned next to the validation tick */
+      background: none;
+      border: none;
+      padding: 0;
+      color: #94a3b8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s ease;
+      outline: none;
+      
+      svg { width: 18px; height: 18px; }
+      &:hover { color: var(--c-teal); }
+    }
+
     /* THE LIVE STATUS ICON */
     .status-icon {
       position: absolute; right: 16px; width: 18px; height: 18px; color: #cbd5e1;

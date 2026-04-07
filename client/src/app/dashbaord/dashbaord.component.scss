@@ -101,7 +101,7 @@
   }
 }
 
-/* Highly compressed Asset Sync to fit in Span 3 */
+/* Compressed Asset Sync & Public Pool (Span 3) */
 .small-inventory {
   grid-column: span 3; background: var(--c-navy); color: #fff; border: none; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;
   .bento-header { margin-bottom: 15px; h2 { color: #fff; font-size: 1.1rem; } }
@@ -117,6 +117,19 @@
   
   .util-bar { .util-labels { display: flex; justify-content: space-between; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; } .util-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; .util-fill { height: 100%; background: var(--c-teal); border-radius: 3px; } } }
 }
+
+/* STAFF SPECIFIC PUBLIC POOL */
+.navy-bg { background-color: var(--c-navy) !important; color: #fff; }
+.public-list-compact {
+  display: flex; flex-direction: column; gap: 10px;
+  .public-mission {
+    padding: 10px 12px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
+    strong { font-size: 0.85rem; color: #fff; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    small { font-size: 0.7rem; color: #94a3b8; font-weight: 600; }
+  }
+}
+.text-teal { color: var(--c-teal) !important; }
+
 
 /* --- ROW 2: LEDGER (Span 9 WIDER) & KPIs (Span 3 NARROWER) --- */
 .ledger-bento {
@@ -141,7 +154,6 @@
   grid-column: span 3; display: grid; grid-template-columns: 1fr; gap: 15px;
 }
 
-/* Highly compressed KPI cards to fit in Span 3 */
 .mini-kpi-card {
   padding: 15px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 15px;
 
@@ -177,7 +189,7 @@
 .mini-prog-wrap { width: 90px; .mini-nums { font-size: 0.7rem; color: #64748b; font-weight: 600; text-align: right; margin-bottom: 3px; } .mini-bg { width: 100%; height: 5px; background: #e2e8f0; border-radius: 3px; overflow: hidden; .mini-fill { height: 100%; transition: width 0.5s; } } }
 
 .btn-ghost { background: transparent; border: none; color: var(--c-teal); font-size: 0.85rem; font-weight: 700; cursor: pointer; padding: 0; &:hover { color: var(--c-orange); text-decoration: underline; } }
-.btn-primary { background: var(--c-teal); color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; &.orange-btn { background: var(--c-orange); } &:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); } }
+.btn-primary { background: var(--c-teal); color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; &.orange-btn { background: var(--c-orange); } &.small-btn { padding: 8px 16px; font-size: 0.85rem; } &:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); } }
 
 /* --- STAFF & CLIENT LARGE CARDS --- */
 .huge-action-card { padding: 40px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; .huge-icon { width: 70px; height: 70px; background: rgba(13, 148, 136, 0.1); color: var(--c-teal); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; svg { width: 34px; height: 34px; } &.orange-icon { background: rgba(234, 88, 12, 0.1); color: var(--c-orange); } } h2 { font-family: 'Montserrat', sans-serif; font-size: 1.8rem; color: var(--c-navy); margin: 0 0 10px 0; } p { color: #64748b; margin-bottom: 25px; font-size: 1.05rem; } }
@@ -193,7 +205,7 @@
 /* --- RESPONSIVENESS --- */
 @media (max-width: 1024px) {
   .monitor-bento { grid-column: span 12; }
-  .small-inventory { grid-column: span 12; flex-direction: row; align-items: center; justify-content: space-between; .bento-header { margin: 0; } .inv-stats-small { flex-direction: row; margin: 0; gap: 30px; .stat-block { border: none; padding: 0; gap: 10px; flex-direction: row-reverse; } } .util-bar { width: 300px; } }
+  .small-inventory { grid-column: span 12; flex-direction: row; align-items: center; justify-content: space-between; .bento-header { margin: 0; } .inv-stats-small { flex-direction: row; margin: 0; gap: 30px; .stat-block { border: none; padding: 0; gap: 10px; flex-direction: row-reverse; } } .util-bar { width: 300px; } .public-list-compact { flex-direction: row; width: 100%; gap: 15px; .public-mission { flex: 1; } } }
   .ledger-bento { grid-column: span 12; }
   .kpi-bento-group { grid-column: span 12; grid-template-columns: repeat(4, 1fr); }
 }
@@ -201,7 +213,7 @@
 @media (max-width: 768px) {
   .dash-header { padding: 30px 20px; flex-direction: column; align-items: flex-start; gap: 15px; .header-meta { flex-direction: column; align-items: flex-start; width: 100%; .meta-divider { display: none; } } }
   .kpi-bento-group { grid-template-columns: repeat(2, 1fr); }
-  .small-inventory { flex-direction: column; align-items: flex-start; .util-bar { width: 100%; } }
+  .small-inventory { flex-direction: column; align-items: flex-start; .util-bar { width: 100%; } .public-list-compact { flex-direction: column; } }
   .action-grid { grid-template-columns: 1fr !important; }
   .client-grid { grid-template-columns: 1fr; }
 }

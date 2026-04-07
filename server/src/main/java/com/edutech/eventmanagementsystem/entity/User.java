@@ -18,7 +18,7 @@ public class User {
     private String email;
     private String role;
 
-    // --- NEW: Security Questions for Password Reset ---
+    // --- Security Questions for Password Reset ---
     private String securityQuestion1;
     private String securityAnswer1;
     private String securityQuestion2;
