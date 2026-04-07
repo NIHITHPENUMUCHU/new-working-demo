@@ -30,7 +30,18 @@ export class ResourceAllocateComponent implements OnInit {
     this.getAllocations(); 
   }
 
-  getEvent(): void { this.httpService.GetAllevents().subscribe((data: any) => this.eventList = data); }
+  getEvent(): void { 
+    this.httpService.GetAllevents().subscribe((data: any[]) => {
+      // FRONTEND DEFENSE: Filter out locked events so they can't be selected in the dropdown
+      if (data) {
+        this.eventList = data.filter(ev => 
+          ev.status?.toUpperCase() !== 'COMPLETED' && 
+          ev.status?.toUpperCase() !== 'CANCELLED'
+        );
+      }
+    }); 
+  }
+  
   getResources(): void { this.httpService.GetAllResources().subscribe((data: any) => this.resourceList = data); }
 
   getAllocations(): void {
@@ -112,7 +123,6 @@ export class ResourceAllocateComponent implements OnInit {
       }
     }
 
-    // BULLETPROOF PAYLOAD: Clean, flat map isolating Jackson from Hibernate entities!
     const payload = this.manifest.map(item => {
       const extractedId = item.resource.resourceID || item.resource.resourceId || item.resource.id || item.resource.ID;
       return {
@@ -132,7 +142,7 @@ export class ResourceAllocateComponent implements OnInit {
       },
       (error) => {
         this.showError = true; 
-        this.errorMessage = error.error?.message || "Failed to deploy manifest.";
+        this.errorMessage = error.error?.message || error.message || "Failed to deploy manifest.";
         setTimeout(() => this.showError = false, 4000);
       }
     );
