@@ -109,6 +109,8 @@ public class EventService {
         if(eventDetails.getStatus() != null) event.setStatus(eventDetails.getStatus());
         if(eventDetails.getMaxCapacity() != null) event.setMaxCapacity(eventDetails.getMaxCapacity());
 
+        if(eventDetails.getAssignedStaffUsername() != null) event.setAssignedStaffUsername(eventDetails.getAssignedStaffUsername());
+
         Event updatedEvent = eventRepository.save(event);
 
         boolean justCompleted = (oldStatus == null || !oldStatus.equalsIgnoreCase("COMPLETED")) && "COMPLETED".equalsIgnoreCase(updatedEvent.getStatus());
